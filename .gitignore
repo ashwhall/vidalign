@@ -1,0 +1,26 @@
+# Core dump
+/core
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python package artifacts
+*.egg-info/
+.eggs/
+
+# Temporary files
+*.swp
+*~
+
+# IDE configuration
+.vscode
+.idea
+
+# OSX
+.DS_Store
+
+*.mp4
+*.json
+*.
