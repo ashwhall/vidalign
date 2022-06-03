@@ -1,6 +1,6 @@
 import json
 from PySide6 import QtCore, QtWidgets
-from vidalign.model.model import Model
+from vidalign.model import Model
 from vidalign.utils.encoders.encoder import Encoder
 
 

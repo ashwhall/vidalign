@@ -2,7 +2,7 @@ from PySide6 import QtWidgets, QtCore, QtGui
 import numpy as np
 
 from vidalign.controllers import VideoListController
-from vidalign.model.model import Model
+from vidalign.model import Model
 from vidalign.widgets import TableWidget
 
 

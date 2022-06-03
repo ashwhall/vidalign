@@ -1,7 +1,7 @@
 from PySide6 import QtWidgets, QtCore
 
 from vidalign.controllers import ClipListController
-from vidalign.model.model import Model
+from vidalign.model import Model
 from vidalign.widgets import TableWidget
 
 

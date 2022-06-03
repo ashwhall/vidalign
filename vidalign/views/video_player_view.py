@@ -1,7 +1,7 @@
 from PySide6 import QtWidgets, QtCore
 
 from vidalign.controllers import VideoPlayerController
-from vidalign.model.model import Model
+from vidalign.model import Model
 from vidalign.utils.video import Video
 from vidalign.widgets.modules import VideoPlayer
 

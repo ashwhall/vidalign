@@ -2,7 +2,7 @@ from PySide6 import QtWidgets, QtCore
 
 from vidalign.controllers import VideoInfoController
 from vidalign.widgets import VideoInfo
-from vidalign.model.model import Model
+from vidalign.model import Model
 from vidalign.widgets.text_field_dialog import TextFieldDialog
 
 

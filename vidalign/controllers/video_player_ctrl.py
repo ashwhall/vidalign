@@ -1,6 +1,6 @@
 from PySide6 import QtCore
 
-from vidalign.model.model import Model
+from vidalign.model import Model
 
 
 class VideoPlayerController(QtCore.QObject):

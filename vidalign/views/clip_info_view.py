@@ -2,7 +2,7 @@ from PySide6 import QtWidgets, QtCore
 
 from vidalign.controllers import ClipInfoController
 from vidalign.widgets import ClipInfo, TextFieldDialog
-from vidalign.model.model import Model
+from vidalign.model import Model
 
 
 class ClipInfoView(QtWidgets.QWidget):

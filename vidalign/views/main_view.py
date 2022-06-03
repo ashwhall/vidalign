@@ -1,8 +1,8 @@
-from PySide6 import QtWidgets, QtCore
-from vidalign.controllers import *
-from vidalign.model.model import Model
-from vidalign.views import *
+from PySide6 import QtWidgets, QtCore, QtGui
 from PySide6.QtCore import Qt
+from vidalign.controllers import *
+from vidalign.model import Model
+from vidalign.views import *
 
 from vidalign.views import ConfigView
 
@@ -16,6 +16,7 @@ class MainView(QtWidgets.QWidget):
         self.setMinimumSize(QtCore.QSize(640, 480))
         self.resize(1400, 900)
         self.setWindowTitle('Vidalign')
+        self.setWindowIcon(QtGui.QIcon('vidalign/assets/icon.png'))
 
         outer_layout = QtWidgets.QSplitter(Qt.Vertical)
 

@@ -1,7 +1,7 @@
 from PySide6 import QtWidgets, QtCore
 
 from vidalign.controllers import ConfigController
-from vidalign.model.model import Model
+from vidalign.model import Model
 from vidalign.constants import COLOURS
 from vidalign.widgets import EncodingConfig, VideoClipConfig
 

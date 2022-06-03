@@ -1,7 +1,7 @@
 from PySide6 import QtWidgets
 
 from vidalign.controllers import VideoDropperController
-from vidalign.model.model import Model
+from vidalign.model import Model
 from vidalign.widgets import VideoDropper
 
 

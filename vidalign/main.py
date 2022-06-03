@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QApplication
-from vidalign.model.model import Model
+from vidalign.model import Model
 from vidalign.controllers import MainController
 from vidalign.views.main_view import MainView
 

@@ -1,7 +1,7 @@
 from PySide6 import QtCore, QtWidgets
 from threading import Thread
 
-from vidalign.model.model import Model
+from vidalign.model import Model
 from vidalign.utils.video import Video
 
 
