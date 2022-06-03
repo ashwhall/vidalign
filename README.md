@@ -1,6 +1,4 @@
-# VidAlign
-
-![icon](vidalign/assets/icon.png)
+![icon](vidalign/assets/icon-wide.png)
 
 A tool to perform multi-camera video temporal alignment and clip extraction.
 

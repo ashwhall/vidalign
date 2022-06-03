@@ -1,4 +1,4 @@
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore, QtGui
 
 from vidalign.controllers import ConfigController
 from vidalign.model import Model
@@ -13,6 +13,12 @@ class ConfigView(QtWidgets.QWidget):
         self._controller = controller
 
         self.layout = QtWidgets.QVBoxLayout()
+
+        icon = QtWidgets.QLabel()
+        icon.setPixmap(QtGui.QPixmap('vidalign/assets/icon-wide.png'))
+        icon.setAlignment(QtCore.Qt.AlignCenter)
+        icon.setFixedHeight(100)
+        self.layout.addWidget(icon)
 
         self._encoding_config = EncodingConfig(self._model.output_directory, self._model.encoders, self._model.current_encoder)
         self.layout.addWidget(self._encoding_config)
