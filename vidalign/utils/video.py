@@ -1,26 +1,39 @@
 import os
 from dataclasses import dataclass
 from vidalign.utils.video_reader import VideoReader
+from PySide6.QtGui import QImage, QPixmap, QKeySequence
 
 
 @dataclass
 class Video:
     path: str
     alias: str = None
-    frame_count: int = None
     sync_frame: int = None
     _reader: VideoReader = None
+    _qt_thumb = None
 
     @property
     def reader(self):
         if self._reader is None:
             self._reader = VideoReader(self.path)
-            self.frame_count = len(self._reader)
         self._reader.open()
         return self._reader
 
     def close(self):
         self._reader.close()
+
+    def preload_metadata(self):
+        _ = len(self)
+        _ = self.qt_thumb
+
+    @property
+    def qt_thumb(self):
+        if self._qt_thumb is None:
+            thumb_img = self.reader.get_thumbnail()
+            height, width, _ = thumb_img.shape
+            bytesPerLine = 3 * width
+            self._qt_thumb = QImage(thumb_img, width, height, bytesPerLine, QImage.Format_RGB888)
+        return self._qt_thumb
 
     @property
     def name(self):
@@ -31,9 +44,7 @@ class Video:
         return self.reader.fps
 
     def __len__(self):
-        if self.reader is None:
-            return None
-        return self.frame_count
+        return len(self.reader)
 
     def abs_to_rel(self, frame):
         """Convert an absolute frame number to sync-frame-relative"""
@@ -58,12 +69,12 @@ class Video:
         return f"{hours:02d}:{minutes:02d}:{seconds:06.3f}"
 
     def complete(self):
-        return self.path is not None and self.frame_count is not None and self.sync_frame is not None and self.alias is not None
+        return self.path is not None and len(self) and self.sync_frame is not None and self.alias is not None
 
     def to_dict(self):
         return {
             'path': self.path,
-            'frame_count': self.frame_count,
+            'frame_count': len(self),
             'sync_frame': self.sync_frame,
         }
     

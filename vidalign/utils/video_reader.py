@@ -87,3 +87,11 @@ class VideoReader:
 
     def frames_to_seconds(self, frame):
         return frame / self.fps
+
+    def get_thumbnail(self, height=75):
+        curr_frame = self.current_frame
+        self.seek_absolute(0)
+        frame = self.grab()
+        self.seek_absolute(curr_frame)
+        width = int(frame.shape[1] * height / frame.shape[0])
+        return cv2.resize(frame, (width, height))

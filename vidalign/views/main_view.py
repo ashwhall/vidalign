@@ -31,6 +31,14 @@ class MainView(QtWidgets.QWidget):
         layout.addWidget(outer_layout)
         self.setLayout(layout)
 
+        # Make the splitter handles visible
+        self.setStyleSheet("""
+            QSplitter::handle {
+                background-color: #bfbfbf;
+                margin: -1px;
+            }
+        """)
+
     def make_top_layout(self):
         layout = QtWidgets.QSplitter(Qt.Horizontal)
 

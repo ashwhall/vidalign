@@ -1,7 +1,8 @@
 from dataclasses import dataclass
-from typing import TypeVar, Generic, List
+from ipaddress import collapse_addresses
+from typing import Type, TypeVar, Generic, List
 from PySide6.QtWidgets import (QTableWidget, QTableWidgetItem)
-from PySide6 import QtCore
+from PySide6 import QtCore, QtGui, QtWidgets
 
 T = TypeVar('T')
 
@@ -14,6 +15,7 @@ class TableWidget(QTableWidget, Generic[T]):
         key: str
         width: float
         placeholder: str = '--'
+        type: Type = str
 
     item_selected = QtCore.Signal(object)  # Just pretend that it's a `T` instead of `object`
 
@@ -66,10 +68,25 @@ class TableWidget(QTableWidget, Generic[T]):
         for i, item in enumerate(self.data):
             for j, column in enumerate(self.columns):
                 value = getattr(item, column.key, None)
+                # Check if it's a function
+                if callable(value):
+                    value = value()
+    
                 if value is None:
                     value = column.placeholder
-                self.setItem(i, j, QTableWidgetItem(str(value)))
-            
+                
+                if column.type == str:
+                    widg_item = QTableWidgetItem(str(value))
+                    self.setItem(i, j, widg_item)
+                elif column.type == QtGui.QImage and value is not None:
+                    widg_item = QtWidgets.QLabel()
+                    widg_item.setPixmap(QtGui.QPixmap(value))
+                    widg_item.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+                    self.setCellWidget(i, j, widg_item)
+                    # Increase the height of the row to fit the image
+                    if value.height() > self.rowHeight(i):
+                        self.setRowHeight(i, value.height())
+                    
             if i == self.selected_row:
                 self.setVerticalHeaderItem(i, QTableWidgetItem('>'))
                 if requires_refresh:

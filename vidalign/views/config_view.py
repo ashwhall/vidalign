@@ -20,8 +20,6 @@ class ConfigView(QtWidgets.QWidget):
         self._video_clip_config = VideoClipConfig(self._model.output_directory)
         self.layout.addWidget(self._video_clip_config)
 
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        # self.layout.setSpacing(0)
         self.setObjectName('config')
         self.setStyleSheet(f"""
             QFrame#config {{

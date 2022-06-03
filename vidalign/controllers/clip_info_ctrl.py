@@ -12,6 +12,9 @@ class ClipInfoController(QtCore.QObject):
     @QtCore.Slot()
     def on_new_clip(self):
         self._model.new_clip()
+        # Select the clip if it's the first added
+        if len(self._model.clips) == 1:
+            self._model.current_clip = self._model.clips[0]
 
     @QtCore.Slot()
     def on_rename_clip(self, name):

@@ -1,4 +1,5 @@
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore, QtGui
+import numpy as np
 
 from vidalign.controllers import VideoListController
 from vidalign.model.model import Model
@@ -17,11 +18,13 @@ class VideoListView(QtWidgets.QWidget):
         self.layout.setSpacing(0)
         
         self._table = TableWidget([
-            TableWidget.Column('Video', 'name', 0.35),
-            TableWidget.Column('Alias', 'alias', 0.35),
-            TableWidget.Column('Frames', 'frame_count', 0.15, '?'),
+            TableWidget.Column('Thumbnail', 'qt_thumb', 0.1, None, type=QtGui.QImage),
+            TableWidget.Column('Video', 'name', 0.3),
+            TableWidget.Column('Alias', 'alias', 0.3),
+            TableWidget.Column('Frames', '__len__', 0.15, '?'),
             TableWidget.Column('Sync Frame', 'sync_frame', 0.15)
         ], self._model.videos)
+        
         self.layout.addWidget(self._table)
         self.setLayout(self.layout)
 
