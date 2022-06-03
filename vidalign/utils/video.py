@@ -74,6 +74,7 @@ class Video:
     def to_dict(self):
         return {
             'path': self.path,
+            'alias': self.alias,
             'frame_count': len(self),
             'sync_frame': self.sync_frame,
         }
@@ -82,6 +83,6 @@ class Video:
     def from_dict(cls, data):
         return cls(
             path=data['path'],
-            frame_count=data['frame_count'],
+            alias=data['alias'],
             sync_frame=data['sync_frame'],
         )

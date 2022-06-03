@@ -1,3 +1,4 @@
+import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Dict, List
@@ -41,6 +42,13 @@ class Encoder(ABC):
         self.name = name
         self.enc_params = enc_params
 
+    def get_clip_base_path(self, video, clip, output_dir):
+        """
+        Get the unique base path for a clip.
+        Constructed like {output_dir}/{clip_name}_{video_alias}
+        """
+        return os.path.join(output_dir, f'{clip.name.replace(" ", "_")}_{video.alias.replace(" ", "_")}')
+    
     @abstractmethod
     def get_encode_command(self, video, clip, output_dir):
         pass

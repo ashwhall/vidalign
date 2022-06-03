@@ -316,6 +316,7 @@ class Model(QtCore.QObject):
         self.clips = []
         self.current_clip = None
         self.current_video = None
+        self.output_directory = None
 
     def encoders_dict(self):
         return {

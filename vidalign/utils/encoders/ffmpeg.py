@@ -19,9 +19,9 @@ class FFmpeg(Encoder):
                 'extension': Encoder.EncParam('--', 'mp4', 'mp4', 'File extension')
             }
         )
-        
+    
     def output_path(self, video, clip, output_dir):
-        path = os.path.join(output_dir, f'{clip.name.replace(" ", "_")}_{video.alias.replace(" ", "_")}')
+        path = self.get_clip_base_path(video, clip, output_dir)
         if ext := self.enc_params['extension'].value:
             base = os.path.splitext(path)[0]
             path = f'{base}.{ext}'
