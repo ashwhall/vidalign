@@ -70,7 +70,7 @@ class ConfigView(QtWidgets.QWidget):
     @QtCore.Slot()
     def on_load_video_clip_config(self):
         file_dialog = QtWidgets.QFileDialog()
-        file_dialog.setNameFilter('Video/Clip JSON Files (vc.json)')
+        file_dialog.setNameFilter('Video/Clip JSON Files (*.vc.json)')
         file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
         file_dialog.setViewMode(QtWidgets.QFileDialog.Detail)
         file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptOpen)
@@ -96,7 +96,7 @@ class ConfigView(QtWidgets.QWidget):
     @QtCore.Slot()
     def on_load_encoder_config(self):
         file_dialog = QtWidgets.QFileDialog()
-        file_dialog.setNameFilter('Encoder JSON Files (enc.json)')
+        file_dialog.setNameFilter('Encoder JSON Files (*.enc.json)')
         file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFile)
         file_dialog.setViewMode(QtWidgets.QFileDialog.Detail)
         file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptOpen)
