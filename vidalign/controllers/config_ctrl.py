@@ -11,11 +11,6 @@ class ConfigController(QtCore.QObject):
         self._model = model
 
     @QtCore.Slot()
-    def on_save_video_clip_config(self, path):
-        with open(path, 'w') as f:
-            json.dump(self._model.video_clip_dict(), f)
-
-    @QtCore.Slot()
     def on_reset_video_clip_config(self):
         self._model.reset_video_clip_config()
 
@@ -31,7 +26,6 @@ class ConfigController(QtCore.QObject):
         if file_path:
             with open(file_path, 'w') as f:
                 json.dump(self._model.video_clip_dict(), f, indent=2)
-                ()
 
     @QtCore.Slot()
     def on_load_encoder_config(self, file_path):
@@ -90,7 +84,7 @@ class ConfigController(QtCore.QObject):
             return
 
         self._model.start_encoding_tasks()
-    
+
     @QtCore.Slot()
     def on_cancel_encode(self):
         self._model.cancel_encoding_tasks()
@@ -106,7 +100,7 @@ class ConfigController(QtCore.QObject):
     @QtCore.Slot()
     def on_encoding_progress_changed(self, value):
         self._model.encoding_progress = value
-    
+
     @QtCore.Slot(Encoder)
     def on_current_encoder_changed(self, value):
         self._model.current_encoder = value
