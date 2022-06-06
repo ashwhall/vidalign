@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (QLabel,
                                QHBoxLayout, QWidget, QSizePolicy)
 from vidalign.constants import COLOURS
 
+
 class VideoDropper(QWidget):
     ACCEPTED_EXTENSIONS = (
         'mp4',
@@ -16,7 +17,6 @@ class VideoDropper(QWidget):
     )
     videos_dropped = QtCore.Signal(list)
 
-# TODO: Select the clip if it's the first created
     def __init__(self):
         super().__init__()
         self.setAcceptDrops(True)
