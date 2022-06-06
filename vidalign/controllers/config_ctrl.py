@@ -20,6 +20,10 @@ class ConfigController(QtCore.QObject):
             with open(file_path, 'r') as f:
                 data = json.load(f)
             self._model.from_dict(data)
+            if self._model.current_video is None and self._model.videos:
+                self._model.current_video = self._model.videos[0]
+            if self._model.current_clip is None and self._model.clips:
+                self._model.current_clip = self._model.clips[0]
 
     @QtCore.Slot()
     def on_save_video_clip_config(self, file_path):

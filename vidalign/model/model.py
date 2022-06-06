@@ -31,7 +31,7 @@ class Model(QtCore.QObject):
         super(Model, self).__init__()
         self._videos: List[Video] = []
         self._clips: List[Clip] = []
-        
+
         self._current_video: Video = None
         self._current_clip: Clip = None
         self._current_frame = 0
@@ -41,13 +41,13 @@ class Model(QtCore.QObject):
 
         self._video_playback_timer = QtCore.QTimer()
         self._video_playback_timer.timeout.connect(self._play_callback)
-        
+
         self._encoders = [FFmpeg()]
         self._current_encoder = self._encoders[0]
         self._encoding_tasks: List[EncodingTask] = []
         self._encoding_percentage: float = None
         self._encoding_stdout: str = ''
-    
+
     @property
     def output_directory(self):
         return self._output_directory
@@ -102,7 +102,7 @@ class Model(QtCore.QObject):
         for video in self.videos:
             if not video.complete():
                 return False, 'Video(s) not complete'
-        
+
         for clip in self.clips:
             if not clip.complete():
                 return False, 'Clip(s) not complete'
@@ -110,12 +110,12 @@ class Model(QtCore.QObject):
         return True, None
 
     def make_encoding_tasks(self):
-        tasks =[]
+        tasks = []
         for clip in self.clips:
             for video in self.videos:
                 tasks.append(EncodingTask(video, clip, self.current_encoder))
         self.encoding_tasks = tasks
-    
+
     @property
     def videos(self):
         return self._videos
@@ -259,13 +259,16 @@ class Model(QtCore.QObject):
     def remove_current_video(self):
         if self.current_video is None:
             return
+        video = self.current_video
 
-        video_idx = self.videos.index(self.current_video)
-        new_selected_idx = min(video_idx, len(self.videos) - 1)
+        video_idx = self.videos.index(video)
+        new_selected_idx = min(video_idx, len(self.videos) - 2)
         if new_selected_idx >= 0:
             self.current_video = self.videos[new_selected_idx]
+        else:
+            self.current_video = None
 
-        self.videos.remove(self.current_video)
+        self.videos.remove(video)
         self.videos = self.videos
 
     def new_clip(self):
@@ -273,16 +276,20 @@ class Model(QtCore.QObject):
         for clip in self.clips:
             if clip.name.startswith('Clip '):
                 max_unnamed_clip = max(max_unnamed_clip, int(clip.name.split()[-1]))
-        self.clips = [*self.clips, Clip(name=f'Clip {max_unnamed_clip + 1}', start_frame=self.abs_to_rel(self.current_frame))]
+        self.clips = [
+            *self.clips, Clip(name=f'Clip {max_unnamed_clip + 1}', start_frame=self.abs_to_rel(self.current_frame))]
 
     def delete_clip(self, clip):
         if clip is None:
             return
         if clip == self.current_clip:
             clip_idx = self.clips.index(clip)
-            new_selected_idx = min(clip_idx, len(self.clips) - 1)
+            new_selected_idx = min(clip_idx, len(self.clips) - 2)
+
             if new_selected_idx >= 0:
                 self.current_clip = self.clips[new_selected_idx]
+            else:
+                self.current_clip = None
 
         self.clips = [c for c in self.clips if clip != c]
 
@@ -310,7 +317,7 @@ class Model(QtCore.QObject):
             'clips': [c.to_dict() for c in self.clips],
             'output_directory': self.output_directory,
         }
-    
+
     def reset_video_clip_config(self):
         self.videos = []
         self.clips = []
@@ -324,13 +331,13 @@ class Model(QtCore.QObject):
                 encoder.name: encoder.to_dict() for encoder in self.encoders
             }
         }
-    
+
     def get_encode_commands(self):
         self.make_encoding_tasks()
         return [
             task.get_encode_command(self.output_directory) for task in self.encoding_tasks
         ]
-    
+
     @property
     def encoding_percentage(self):
         return self._encoding_percentage
@@ -364,11 +371,12 @@ class Model(QtCore.QObject):
                     cancelled = True
                     break
                 self.encoding_stdout_lines.append('')
-                self.encoding_stdout_lines.append(f'=== STARTING ENCODING TASK {i + 1}/{len(self.encoding_tasks)} ===')
+                self.encoding_stdout_lines.append(
+                    f'=== STARTING ENCODING TASK {i + 1}/{len(self.encoding_tasks)} ===')
                 self.encoding_stdout_lines.append(f'=== VIDEO: {task.video.name} ===')
                 self.encoding_stdout_lines.append('')
                 self.encoding_stdout_lines = self.encoding_stdout_lines
-            
+
                 # Hold onto the stdout lines prior to starting this task, so we can repeatedly
                 # append the "updated" lines to the end of the list. Just a funny trick to handle
                 # \r characters in the output
@@ -382,7 +390,7 @@ class Model(QtCore.QObject):
                 self.encoding_percentage = None
             else:
                 self.encoding_percentage = 1
-        
+
         thread = Thread(target=_run_async)
         thread.start()
 
@@ -417,7 +425,7 @@ class Model(QtCore.QObject):
                 except IndexError:
                     print(f'WARNING: No encoder found with name {key}')
             self.encoders = self.encoders
-    
+
     def set_current_video_alias(self, alias):
         if self.current_video is None:
             return
