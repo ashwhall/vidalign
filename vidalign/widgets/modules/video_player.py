@@ -75,27 +75,27 @@ class VideoPlayer(QWidget):
     def _make_controls_layout(self):
         layout = QHBoxLayout()
 
-        big_prev_frame_button = self.Button(text='⏪⏪ (A)')
+        big_prev_frame_button = self.Button(text='←← (A)')
         big_prev_frame_button.setShortcut(QKeySequence('shift+a'))
         big_prev_frame_button.clicked.connect(lambda: self.seek_relative(-10))
         layout.addWidget(big_prev_frame_button)
 
-        prev_frame_button = self.Button(text='⏪ (a)')
+        prev_frame_button = self.Button(text='← (a)')
         prev_frame_button.setShortcut(QKeySequence('a'))
         prev_frame_button.clicked.connect(self.prev)
         layout.addWidget(prev_frame_button)
 
-        self.play_pause_button = self.Button(text='▶️ (space)')
+        self.play_pause_button = self.Button(text='► (space)')
         self.play_pause_button.setShortcut(QKeySequence('space'))
         self.play_pause_button.clicked.connect(self.play_pause)
         layout.addWidget(self.play_pause_button)
 
-        next_frame_button = self.Button(text='⏩ (d)')
+        next_frame_button = self.Button(text='→ (d)')
         next_frame_button.setShortcut(QKeySequence('d'))
         next_frame_button.clicked.connect(self.next)
         layout.addWidget(next_frame_button)
 
-        big_next_frame_button = self.Button(text='⏩⏩ (D)')
+        big_next_frame_button = self.Button(text='→→ (D)')
         big_next_frame_button.setShortcut(QKeySequence('shift+d'))
         big_next_frame_button.clicked.connect(lambda: self.seek_relative(10))
         layout.addWidget(big_next_frame_button)
