@@ -58,10 +58,12 @@ class ConfigController(QtCore.QObject):
         # Display the commands in a dialog, one per line
         cmds = self._model.get_encode_commands()
         if any(callable(cmd) for cmd in cmds):
-            QtWidgets.QMessageBox.warning(
+            QtWidgets.QMessageBox.information(
                 None,
                 'No encode command for the selected encoder',
-                'The selected encoder does not have an encode command.'
+                'The selected encoder does not have an encode command. '
+                'This is likely as it\'s a custom encoder, which can only be '
+                'run within the VidAlign GUI.'
             )
             return
         dialog = QtWidgets.QDialog()

@@ -108,6 +108,13 @@ class Model(QtCore.QObject):
             if not clip.complete():
                 return False, 'Clip(s) not complete'
 
+        try:
+            self.make_encoding_tasks()
+            for task in self.encoding_tasks:
+                task.get_encode_command(self.output_directory)
+        except Exception as e:
+            return False, str(e)
+
         return True, None
 
     def make_encoding_tasks(self):

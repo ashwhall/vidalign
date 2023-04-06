@@ -1,7 +1,80 @@
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Dict, Optional
+from scipy.interpolate import interp1d
+from PySide6.QtGui import QImage
 from vidalign.utils.video_reader import VideoReader
-from PySide6.QtGui import QImage, QPixmap, QKeySequence
+
+
+@dataclass
+class Box:
+    x0: int
+    y0: int
+    x1: int
+    y1: int
+
+    def to_dict(self):
+        return [self.x0, self.y0, self.x1, self.y1]
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            x0=data[0],
+            y0=data[1],
+            x1=data[2],
+            y1=data[3],
+        )
+
+
+@dataclass
+class MovingCrop:
+    crop_frames: Dict[int, Box] = field(default_factory=dict)
+
+    def to_dict(self):
+        return {
+            str(frame): box.to_dict()
+            for frame, box in self.crop_frames.items()
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            crop_frames={
+                int(frame): Box.from_dict(box)
+                for frame, box in data.items()
+            }
+        )
+
+    def add_crop(self, frame, box):
+        self.crop_frames[frame] = box
+
+    def get_crop(self, frame):
+        if frame in self.crop_frames:
+            return self.crop_frames[frame]
+
+        frames = sorted(self.crop_frames.keys())
+        if frame < frames[0]:
+            return self.crop_frames[frames[0]]
+        if frame > frames[-1]:
+            return self.crop_frames[frames[-1]]
+
+        # Interpolate
+        x0s = [self.crop_frames[f].x0 for f in frames]
+        y0s = [self.crop_frames[f].y0 for f in frames]
+        x1s = [self.crop_frames[f].x1 for f in frames]
+        y1s = [self.crop_frames[f].y1 for f in frames]
+
+        x0_interp = interp1d(frames, x0s, kind='linear')
+        y0_interp = interp1d(frames, y0s, kind='linear')
+        x1_interp = interp1d(frames, x1s, kind='linear')
+        y1_interp = interp1d(frames, y1s, kind='linear')
+
+        return Box(
+            x0=int(x0_interp(frame)),
+            y0=int(y0_interp(frame)),
+            x1=int(x1_interp(frame)),
+            y1=int(y1_interp(frame)),
+        )
 
 
 @dataclass
@@ -11,6 +84,7 @@ class Video:
     sync_frame: int = None
     _reader: VideoReader = None
     _qt_thumb = None
+    crop: Optional[MovingCrop] = None
 
     @property
     def reader(self):
@@ -77,6 +151,7 @@ class Video:
             'alias': self.alias,
             'frame_count': len(self),
             'sync_frame': self.sync_frame,
+            'crop': self.crop.to_dict() if self.crop is not None else None,
         }
 
     @classmethod
@@ -85,4 +160,5 @@ class Video:
             path=data['path'],
             alias=data['alias'],
             sync_frame=data['sync_frame'],
+            crop=MovingCrop.from_dict(data['crop']) if data['crop'] is not None else None,
         )

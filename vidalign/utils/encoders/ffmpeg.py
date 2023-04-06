@@ -27,6 +27,9 @@ class FFmpeg(Encoder):
         return path
 
     def get_encode_command(self, video: Video, clip: Clip, output_dir: str):
+        if video.crop is not None:
+            raise NotImplementedError('FFmpeg does not support cropping.')
+
         cmd = []
 
         abs_start_frame = video.rel_to_abs(clip.start_frame)
