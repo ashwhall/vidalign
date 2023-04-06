@@ -43,7 +43,7 @@ class Model(QtCore.QObject):
         self._video_playback_timer = QtCore.QTimer()
         self._video_playback_timer.timeout.connect(self._play_callback)
 
-        self._encoders = [FFmpeg(), PyAV()]
+        self._encoders = [PyAV(), FFmpeg()]
         self._current_encoder = self._encoders[0]
         self._encoding_tasks: List[EncodingTask] = []
         self._encoding_percentage: float = None
