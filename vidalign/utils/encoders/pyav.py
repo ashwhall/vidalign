@@ -89,6 +89,8 @@ class PyAV(Encoder):
                 height=height,
             )
 
+            yield f'\Writing {self.output_path(video, clip, output_dir)}'
+
             while reader.current_frame < abs_end_frame:
                 percent = (reader.current_frame - abs_start_frame) / \
                     (abs_end_frame - abs_start_frame)
