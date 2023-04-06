@@ -73,12 +73,16 @@ class PyAV(Encoder):
             abs_end_frame = video.rel_to_abs(clip.end_frame)
             reader.seek_absolute(abs_start_frame)
 
-            requires_crop = video.will_be_cropped()
+            requires_crop = video.will_be_cropped(clip)
             width = video.reader.width
             height = video.reader.height
             if requires_crop:
-                width = video.get_maximum_crop_width()
-                height = video.get_maximum_crop_height()
+                width = video.get_maximum_crop_width(clip)
+                height = video.get_maximum_crop_height(clip)
+                if width % 2 != 0:
+                    width += 1
+                if height % 2 != 0:
+                    height += 1
 
             writer = PyAVWriter(
                 output_path=self.output_path(video, clip, output_dir),
@@ -89,7 +93,13 @@ class PyAV(Encoder):
                 height=height,
             )
 
-            yield f'\Writing {self.output_path(video, clip, output_dir)}'
+            yield f'Writing {self.output_path(video, clip, output_dir)}'
+            yield f'Resolution: {width}x{height}'
+            yield f'Frate rate: {video.frame_rate}'
+            for param in self.enc_params.values():
+                if param.value is not None:
+                    yield f'{param.flag}: {param.value}'
+            yield ''
 
             while reader.current_frame < abs_end_frame:
                 percent = (reader.current_frame - abs_start_frame) / \

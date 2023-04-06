@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional
 from scipy.interpolate import interp1d
 from PySide6.QtGui import QImage
+from vidalign.utils.clip import Clip
 from vidalign.utils.video_reader import VideoReader
 
 
@@ -48,6 +49,11 @@ class Box:
     @property
     def h(self):
         return self.y1 - self.y0
+
+    def __eq__(self, __value: object) -> bool:
+        if isinstance(__value, Box):
+            return tuple(self.xyxy) == tuple(__value.xyxy)
+        return False
 
 
 @dataclass
@@ -104,12 +110,6 @@ class MovingCrop:
             y1=int(y1_interp(frame)),
         ), True
 
-    def get_maximum_crop_width(self):
-        return max([box.w for box in self.crop_frames.values()])
-
-    def get_maximum_crop_height(self):
-        return max([box.h for box in self.crop_frames.values()])
-
 
 @dataclass
 class Video:
@@ -154,17 +154,24 @@ class Video:
     def get_crop_frames(self):
         return list(sorted(self.__crop.crop_frames.keys()))
 
-    def get_maximum_crop_width(self):
-        return self.__crop.get_maximum_crop_width()
+    def get_crops_for_clip(self, clip: Clip):
+        clip_frames = [self.rel_to_abs(frame) for frame in range(clip.start_frame, clip.end_frame)]
+        return [self.get_crop(frame)[0] for frame in clip_frames]
 
-    def get_maximum_crop_height(self):
-        return self.__crop.get_maximum_crop_height()
+    def get_maximum_crop_width(self, clip: Clip):
+        clip_crops = self.get_crops_for_clip(clip)
+        return max([box.w for box in clip_crops])
 
-    def will_be_cropped(self):
+    def get_maximum_crop_height(self, clip: Clip):
+        clip_crops = self.get_crops_for_clip(clip)
+        return max([box.h for box in clip_crops])
+
+    def will_be_cropped(self, clip: Clip):
         """Returns True if any of the crop frames are not the full frame"""
         if self.__crop is None:
             return False
-        return any([box.xyxy != [0, 0, self.reader.width, self.reader.height] for box in self.__crop.crop_frames.values()])
+        clip_crops = self.get_crops_for_clip(clip)
+        return any([box != Box(0, 0, self.reader.width, self.reader.height) for box in clip_crops])
 
     def close(self):
         self._reader.close()
