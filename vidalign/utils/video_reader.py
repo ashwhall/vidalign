@@ -52,7 +52,8 @@ class VideoReader:
                 frame = MISSING_FRAME
                 # Resize the missing frame to the size of the video if we can
                 if self.cached_frame is not None:
-                    frame = cv2.resize(frame, (self.cached_frame.shape[1], self.cached_frame.shape[0]))
+                    frame = cv2.resize(
+                        frame, (self.cached_frame.shape[1], self.cached_frame.shape[0]))
 
             self.cached_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             self.cached_frame = np.array(self.cached_frame)
@@ -95,3 +96,11 @@ class VideoReader:
         self.seek_absolute(curr_frame)
         width = int(frame.shape[1] * height / frame.shape[0])
         return cv2.resize(frame, (width, height))
+
+    @property
+    def width(self):
+        return self._cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+
+    @property
+    def height(self):
+        return self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)

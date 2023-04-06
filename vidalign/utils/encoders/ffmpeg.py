@@ -5,7 +5,6 @@ from vidalign.utils.encoders import Encoder
 from vidalign.utils.video import Video
 
 
-
 class FFmpeg(Encoder):
     def __init__(self):
         super().__init__(
@@ -19,22 +18,21 @@ class FFmpeg(Encoder):
                 'extension': Encoder.EncParam('--', 'mp4', 'mp4', 'File extension')
             }
         )
-    
+
     def output_path(self, video, clip, output_dir):
         path = self.get_clip_base_path(video, clip, output_dir)
         if ext := self.enc_params['extension'].value:
             base = os.path.splitext(path)[0]
             path = f'{base}.{ext}'
         return path
-    
+
     def get_encode_command(self, video: Video, clip: Clip, output_dir: str):
         cmd = []
 
         abs_start_frame = video.rel_to_abs(clip.start_frame)
         abs_end_frame = video.rel_to_abs(clip.end_frame)
-
-        start_seconds = video.frames_to_seconds(abs_start_frame)
-        end_seconds = video.frames_to_seconds(video.rel_to_abs(clip.end_frame))
+        start_seconds = video.frames_to_seconds(abs_start_frame - .5)
+        end_seconds = video.frames_to_seconds(abs_end_frame)
 
         duration = end_seconds - start_seconds
 
@@ -54,6 +52,6 @@ class FFmpeg(Encoder):
         cmd.extend(self.enc_params['crf'].get_command_array())
         cmd.extend(self.enc_params['scale'].get_command_array())
 
-        cmd.append(self.output_path(video, clip, output_dir))   
+        cmd.append(self.output_path(video, clip, output_dir))
 
         return cmd

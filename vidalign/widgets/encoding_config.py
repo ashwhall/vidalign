@@ -26,7 +26,7 @@ class EncodingConfig(QtWidgets.QFrame):
         self.layout = QtWidgets.QVBoxLayout()
 
         self.layout.addLayout(self._make_encoder_layout())
-        
+
         options_btn = StyledButton('Encoder options')
         options_btn.clicked.connect(self.on_open_encoder_options)
         self.layout.addWidget(options_btn)
@@ -43,7 +43,7 @@ class EncodingConfig(QtWidgets.QFrame):
         self.encoding_dialog = None
 
         self.setLayout(self.layout)
-    
+
     def _make_encoder_layout(self):
         layout = QtWidgets.QVBoxLayout()
 
@@ -107,7 +107,8 @@ class EncodingConfig(QtWidgets.QFrame):
             self.encoding_dialog = None
         elif self.encoding_dialog is None and percentage is not None:
             # Display the commands in a dialog, one per line
-            self.encoding_dialog = EncodingProgressDialog(self._output_dir, percentage, stdout_lines)
+            self.encoding_dialog = EncodingProgressDialog(
+                self._output_dir, percentage, stdout_lines)
             self.encoding_dialog.on_cancel_encode.connect(self.on_cancel_encode)
             self.encoding_dialog.on_finalise_encoding.connect(self.on_finalise_encoding)
             self.encoding_dialog.exec()

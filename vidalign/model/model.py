@@ -4,6 +4,7 @@ from threading import Thread
 from vidalign.utils.encoders.encoder import Encoder
 from vidalign.utils.encoders.encoding_task import EncodingTask
 from vidalign.utils.encoders.ffmpeg import FFmpeg
+from vidalign.utils.encoders.pyav import PyAV
 from vidalign.utils.video import Video
 from vidalign.utils.clip import Clip
 
@@ -42,7 +43,7 @@ class Model(QtCore.QObject):
         self._video_playback_timer = QtCore.QTimer()
         self._video_playback_timer.timeout.connect(self._play_callback)
 
-        self._encoders = [FFmpeg()]
+        self._encoders = [FFmpeg(), PyAV()]
         self._current_encoder = self._encoders[0]
         self._encoding_tasks: List[EncodingTask] = []
         self._encoding_percentage: float = None
@@ -367,9 +368,6 @@ class Model(QtCore.QObject):
 
             self.encoding_stdout_lines.append('=== STARTING ENCODING TASKS ===')
             for i, task in enumerate(self.encoding_tasks):
-                if task._cancelled:
-                    cancelled = True
-                    break
                 self.encoding_stdout_lines.append('')
                 self.encoding_stdout_lines.append(
                     f'=== STARTING ENCODING TASK {i + 1}/{len(self.encoding_tasks)} ===')
@@ -383,6 +381,10 @@ class Model(QtCore.QObject):
                 pre_task_std_lines = self.encoding_stdout_lines
                 for updated_std_lines in task.run_encode_job(self.output_directory):
                     self.encoding_stdout_lines = [*pre_task_std_lines, *updated_std_lines]
+
+                cancelled = cancelled or any([task.cancelled for task in self.encoding_tasks])
+                if cancelled:
+                    break
 
                 self.encoding_percentage = (i + 1) / len(self.encoding_tasks)
 

@@ -57,10 +57,10 @@ class Video:
         if self.sync_frame is None:
             return None
         return frame + self.sync_frame
-    
+
     def frames_to_seconds(self, frame):
         return self.reader.frames_to_seconds(frame)
-        
+
     def seconds_to_timestamp(self, seconds: float):
         """Seconds to HH:MM:SS.mmm"""
         hours = int(seconds / 3600)
@@ -78,7 +78,7 @@ class Video:
             'frame_count': len(self),
             'sync_frame': self.sync_frame,
         }
-    
+
     @classmethod
     def from_dict(cls, data):
         return cls(

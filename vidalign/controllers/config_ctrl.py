@@ -57,6 +57,13 @@ class ConfigController(QtCore.QObject):
 
         # Display the commands in a dialog, one per line
         cmds = self._model.get_encode_commands()
+        if any(callable(cmd) for cmd in cmds):
+            QtWidgets.QMessageBox.warning(
+                None,
+                'No encode command for the selected encoder',
+                'The selected encoder does not have an encode command.'
+            )
+            return
         dialog = QtWidgets.QDialog()
         dialog.setWindowTitle('FFmpeg commands')
         dialog.setWindowModality(QtCore.Qt.ApplicationModal)

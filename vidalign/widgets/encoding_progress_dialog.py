@@ -11,7 +11,7 @@ class EncodingProgressDialog(QtWidgets.QDialog):
         super().__init__()
         self.output_directory = output_directory
 
-         # Display the commands in a dialog, one per line
+        # Display the commands in a dialog, one per line
         self.setWindowTitle(f'Encoding: starting...')
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self.resize(960, 600)
@@ -19,10 +19,12 @@ class EncodingProgressDialog(QtWidgets.QDialog):
         self.text_edit = QtWidgets.QTextEdit()
         self.text_edit.setReadOnly(True)
         # Black background, white foreground, monospace font
-        self.text_edit.setStyleSheet(f'background-color: #101010; color: {COLOURS["white"]}; font-family: monospace;')
+        self.text_edit.setStyleSheet(
+            f'background-color: #101010; color: {COLOURS["white"]}; font-family: monospace;')
         self.layout.addWidget(self.text_edit)
         # Disallow closing
-        self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint)
+        self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.CustomizeWindowHint |
+                            QtCore.Qt.WindowTitleHint)
 
         # Cancel button
         cancel_btn_layout = QtWidgets.QHBoxLayout()
@@ -41,7 +43,7 @@ class EncodingProgressDialog(QtWidgets.QDialog):
         open_dir_btn = StyledButton('Open output directory')
         open_dir_btn.clicked.connect(self.open_output_directory)
         okay_btn_layout.addWidget(open_dir_btn)
-        
+
         self.okay_btn_widget = QtWidgets.QWidget()
         self.okay_btn_widget.setLayout(okay_btn_layout)
 

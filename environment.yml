@@ -5,8 +5,9 @@ channels:
 dependencies:
   - pip=21.0.1
   - python=3.8.8
+  - av=9.0.1
   - pip:
-    - -e .
-    - opencv-python==4.5.5.64
-    - pygobject==3.42.1
-    - PySide6==6.3.0
+      - -e .
+      - opencv-python==4.5.5.64
+      - pygobject==3.42.1
+      - PySide6==6.3.0
