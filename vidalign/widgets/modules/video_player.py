@@ -210,8 +210,9 @@ class VideoPlayer(QWidget):
         self.frame_num_label.setText(f'{self.frame_num:04d}/{len(self.video.reader) - 1:04d}')
         if relative_frame is None:
             self.relative_frame_label.setText('Sync relative: --')
-        self.relative_frame_label.setText(
-            f'Sync relative: {relative_frame:04d}')
+        else:
+            self.relative_frame_label.setText(
+                f'Sync relative: {relative_frame:04d}')
 
         self.slider.setValue(self.frame_num)
         self.slider.setRange(0, len(self.video.reader) - 1)
