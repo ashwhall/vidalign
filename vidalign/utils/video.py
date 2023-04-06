@@ -25,6 +25,30 @@ class Box:
             y1=data[3],
         )
 
+    @property
+    def x0y0(self):
+        return [self.x0, self.y0]
+
+    @property
+    def x1y1(self):
+        return [self.x1, self.y1]
+
+    @property
+    def xyxy(self):
+        return [self.x0, self.y0, self.x1, self.y1]
+
+    @property
+    def xywh(self):
+        return [self.x0, self.y0, self.w, self.h]
+
+    @property
+    def w(self):
+        return self.x1 - self.x0
+
+    @property
+    def h(self):
+        return self.y1 - self.y0
+
 
 @dataclass
 class MovingCrop:
@@ -45,18 +69,22 @@ class MovingCrop:
             }
         )
 
+    def remove_crop(self, frame):
+        if frame in self.crop_frames:
+            del self.crop_frames[frame]
+
     def add_crop(self, frame, box):
         self.crop_frames[frame] = box
 
     def get_crop(self, frame):
         if frame in self.crop_frames:
-            return self.crop_frames[frame]
+            return self.crop_frames[frame], False
 
         frames = sorted(self.crop_frames.keys())
         if frame < frames[0]:
-            return self.crop_frames[frames[0]]
+            return self.crop_frames[frames[0]], True
         if frame > frames[-1]:
-            return self.crop_frames[frames[-1]]
+            return self.crop_frames[frames[-1]], True
 
         # Interpolate
         x0s = [self.crop_frames[f].x0 for f in frames]
@@ -74,7 +102,13 @@ class MovingCrop:
             y0=int(y0_interp(frame)),
             x1=int(x1_interp(frame)),
             y1=int(y1_interp(frame)),
-        )
+        ), True
+
+    def get_maximum_crop_width(self):
+        return max([box.w for box in self.crop_frames.values()])
+
+    def get_maximum_crop_height(self):
+        return max([box.h for box in self.crop_frames.values()])
 
 
 @dataclass
@@ -84,7 +118,13 @@ class Video:
     sync_frame: int = None
     _reader: VideoReader = None
     _qt_thumb = None
-    crop: Optional[MovingCrop] = None
+    _crop: Optional[MovingCrop] = None
+
+    def __init__(self, path, alias=None, sync_frame=None, crop=None):
+        self.path = path
+        self.alias = alias
+        self.sync_frame = sync_frame
+        self._crop = crop
 
     @property
     def reader(self):
@@ -92,6 +132,19 @@ class Video:
             self._reader = VideoReader(self.path)
         self._reader.open()
         return self._reader
+
+    @property
+    def crop(self):
+        if self._crop is None:
+            self._crop = MovingCrop()
+            self._crop.add_crop(0, Box(0, 0, self.reader.width, self.reader.height))
+        return self._crop
+
+    def will_be_cropped(self):
+        """Returns True if any of the crop frames are not the full frame"""
+        if self.crop is None:
+            return False
+        return any([box.xyxy != [0, 0, self.reader.width, self.reader.height] for box in self.crop.crop_frames.values()])
 
     def close(self):
         self._reader.close()
@@ -158,7 +211,7 @@ class Video:
     def from_dict(cls, data):
         return cls(
             path=data['path'],
-            alias=data['alias'],
-            sync_frame=data['sync_frame'],
-            crop=MovingCrop.from_dict(data['crop']) if data['crop'] is not None else None,
+            alias=data.get('alias', None),
+            sync_frame=data.get('sync_frame', None),
+            crop=MovingCrop.from_dict(data['crop']) if data.get('crop', None) is not None else None,
         )

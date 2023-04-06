@@ -1,10 +1,11 @@
+from typing import Optional
 from PySide6 import QtCore
 from PySide6.QtCore import (Qt, QTimer)
 from PySide6.QtWidgets import (QLabel, QHBoxLayout, QSlider,
                                QVBoxLayout, QWidget, QSizePolicy)
-from PySide6.QtGui import QImage, QPixmap, QKeySequence
+from PySide6.QtGui import QImage, QPixmap, QKeySequence, QPainter, QPen
 
-from vidalign.utils.video import Video
+from vidalign.utils.video import Box, Video
 from vidalign.widgets.modules import StyledButton, ImageViewer
 
 
@@ -43,6 +44,7 @@ class VideoPlayer(QWidget):
 
         layout = QVBoxLayout()
         self.image_viewer = ImageViewer()
+        self.image_viewer.cropUpdated.connect(self.on_crop_updated)
         layout.addWidget(self.image_viewer)
 
         layout.addLayout(self._make_timeline_layout())
@@ -55,6 +57,13 @@ class VideoPlayer(QWidget):
         # Build a timer to run every second
         self.timer = QTimer()
         self.timer.timeout.connect(self.play_callback)
+
+    def on_crop_updated(self, box: Optional[Box]):
+        if box is None:
+            self.video.crop.remove_crop(self.video.reader.current_frame)
+        else:
+            self.video.crop.add_crop(self.video.reader.current_frame, box)
+        self.frame_changed.emit(self.video.reader.current_frame)
 
     def _make_timeline_layout(self):
         layout = QHBoxLayout()
@@ -155,6 +164,7 @@ class VideoPlayer(QWidget):
     def clear(self):
         self.video = None
         self.image_viewer.set_image(None)
+        self.image_viewer.set_crop_box(None)
         self.frame_num = None
         self.frame_num_label.setText('??/??')
         self.slider.setValue(0)
@@ -181,7 +191,11 @@ class VideoPlayer(QWidget):
         height, width, _ = frame.shape
         bytesPerLine = 3 * width
         qImg = QImage(frame, width, height, bytesPerLine, QImage.Format_RGB888)
-        self.image_viewer.set_image(QPixmap(qImg), reset=self.video != prev_video)
+        pixmap = QPixmap(qImg)
+
+        self.image_viewer.set_image(pixmap, reset=self.video != prev_video)
+        cropbox, interpolated = self.video.crop.get_crop(self.frame_num)
+        self.image_viewer.set_crop_box(cropbox, interpolated=interpolated)
 
     @requires_video
     def prev(self):

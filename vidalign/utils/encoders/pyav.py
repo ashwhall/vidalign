@@ -2,6 +2,8 @@
 import os
 from fractions import Fraction
 import av
+import numpy as np
+from PIL import Image
 from vidalign.utils.clip import Clip
 from vidalign.utils.encoders import Encoder
 from vidalign.utils.video import Video
@@ -71,18 +73,33 @@ class PyAV(Encoder):
             abs_end_frame = video.rel_to_abs(clip.end_frame)
             reader.seek_absolute(abs_start_frame)
 
+            requires_crop = video.will_be_cropped()
+            width = video.reader.width
+            height = video.reader.height
+            if requires_crop:
+                width = video.crop.get_maximum_crop_width()
+                height = video.crop.get_maximum_crop_height()
+
             writer = PyAVWriter(
                 output_path=self.output_path(video, clip, output_dir),
                 codec=self.enc_params['vcodec'].value,
                 crf=int(self.enc_params['crf'].value),
                 frame_rate=video.frame_rate,
-                width=reader.width,
-                height=reader.height,
+                width=width,
+                height=height,
             )
 
             while reader.current_frame < abs_end_frame:
-                yield f'\rFrame {reader.current_frame} written'
+                percent = (reader.current_frame - abs_start_frame) / \
+                    (abs_end_frame - abs_start_frame)
+                yield f'\rFrame {reader.current_frame - abs_start_frame} of {abs_end_frame - abs_start_frame} ({percent:.2%})'
                 frame = reader.grab()
+                if requires_crop:
+                    bounds = video.crop.get_crop(reader.current_frame)[0]
+                    frame = frame[bounds.y0:bounds.y1+1, bounds.x0:bounds.x1+1]
+                    # Resize
+                    if frame.shape[0] != height or frame.shape[1] != width:
+                        frame = np.array(Image.fromarray(frame).resize((width, height)))
                 writer.write(frame)
                 reader.step()
 
