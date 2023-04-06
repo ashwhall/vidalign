@@ -1,3 +1,5 @@
+from os import path
+from typing import List
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtGui import QGuiApplication
 
@@ -34,7 +36,8 @@ class VideoDropperController(QtCore.QObject):
             progress.show()
             QGuiApplication.processEvents()
             if vid_path not in existing_video_paths:
-                vid = Video(vid_path)
+                alias = self.make_unique_alias(vid_path, new_vid_list)
+                vid = Video(vid_path, alias=alias)
                 vid.preload_metadata()
                 new_vid_list.append(vid)
 
@@ -47,3 +50,13 @@ class VideoDropperController(QtCore.QObject):
 
         if should_select_first_video and new_vid_list:
             self._model.current_video = new_vid_list[0]
+
+    def make_unique_alias(self, new_vid_path: str, existing_videos: List[str]):
+        existing_aliases = set(video.alias for video in existing_videos)
+        new_alias = path.splitext(path.basename(new_vid_path))[0]
+        if new_alias in existing_aliases:
+            i = 1
+            while f'{new_alias} ({i})' in existing_aliases:
+                i += 1
+            new_alias = f'{new_alias} ({i})'
+        return new_alias
