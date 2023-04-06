@@ -151,6 +151,9 @@ class Video:
     def add_crop(self, frame, box):
         self.__crop.add_crop(frame, box)
 
+    def get_crop_frames(self):
+        return list(sorted(self.__crop.crop_frames.keys()))
+
     def get_maximum_crop_width(self):
         return self.__crop.get_maximum_crop_width()
 
@@ -232,3 +235,29 @@ class Video:
             sync_frame=data.get('sync_frame', None),
             crop=MovingCrop.from_dict(data['crop']) if data.get('crop', None) is not None else None,
         )
+
+    def get_next_crop_frame(self):
+        """
+        Return the next crop frame after the current position.
+        Returns current frame if no such frame exists
+        """
+        frames = self.get_crop_frames()
+        if len(frames) == 0:
+            return self.reader.current_frame
+        for frame in frames:
+            if frame > self.reader.current_frame:
+                return frame
+        return self.reader.current_frame
+
+    def get_prev_crop_frame(self):
+        """
+        Return the previous crop frame before the current position.
+        Returns current frame if no such frame exists
+        """
+        frames = self.get_crop_frames()
+        if len(frames) == 0:
+            return self.reader.current_frame
+        for frame in reversed(frames):
+            if frame < self.reader.current_frame:
+                return frame
+        return self.reader.current_frame

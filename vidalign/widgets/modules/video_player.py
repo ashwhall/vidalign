@@ -1,12 +1,13 @@
 from typing import Optional
 from PySide6 import QtCore
 from PySide6.QtCore import (Qt, QTimer)
-from PySide6.QtWidgets import (QLabel, QHBoxLayout, QSlider,
+from PySide6.QtWidgets import (QLabel, QHBoxLayout,
                                QVBoxLayout, QWidget, QSizePolicy)
-from PySide6.QtGui import QImage, QPixmap, QKeySequence, QPainter, QPen
+from PySide6.QtGui import QImage, QPixmap, QKeySequence
 
 from vidalign.utils.video import Box, Video
 from vidalign.widgets.modules import StyledButton, ImageViewer
+from vidalign.widgets.modules.tick_slider import TickSlider
 
 
 def requires_video(fn):
@@ -71,7 +72,7 @@ class VideoPlayer(QWidget):
         layout.addWidget(self.frame_num_label)
 
         # Add a slider
-        self.slider = QSlider(Qt.Horizontal)
+        self.slider = TickSlider(Qt.Horizontal)
         self.slider.setRange(0, 1)
         self.slider.setValue(0)
         self.slider.sliderMoved.connect(self.seek_absolute)
@@ -84,6 +85,21 @@ class VideoPlayer(QWidget):
     def _make_controls_layout(self):
         layout = QHBoxLayout()
 
+        # Crop keyframe jumping
+        prev_crop_kf_button = self.Button(text='Prev Crop\nq')
+        prev_crop_kf_button.setShortcut(QKeySequence('q'))
+        prev_crop_kf_button.clicked.connect(self.seek_to_prev_crop_frame)
+        layout.addWidget(prev_crop_kf_button)
+
+        next_crop_kf_button = self.Button(text='Next Crop\ne')
+        next_crop_kf_button.setShortcut(QKeySequence('e'))
+        next_crop_kf_button.clicked.connect(self.seek_to_next_crop_frame)
+        layout.addWidget(next_crop_kf_button)
+
+        # Tool separator (blank label)
+        layout.addWidget(QLabel('|'))
+
+        # Frame jumping
         big_prev_frame_button = self.Button(text='←←\nA')
         big_prev_frame_button.setShortcut(QKeySequence('shift+a'))
         big_prev_frame_button.clicked.connect(lambda: self.seek_relative(-10))
@@ -153,6 +169,18 @@ class VideoPlayer(QWidget):
         self.video_seeked_absolute.emit(frame)
         self.pause()
 
+    @requires_video
+    def seek_to_next_crop_frame(self):
+        frame = self.video.get_next_crop_frame()
+        self.video_seeked_absolute.emit(frame)
+        self.pause()
+
+    @requires_video
+    def seek_to_prev_crop_frame(self):
+        frame = self.video.get_prev_crop_frame()
+        self.video_seeked_absolute.emit(frame)
+        self.pause()
+
     def started_or_stopped_playing(self, playing: bool):
         btn_shortcut = self.play_pause_button.shortcut()
         if playing:
@@ -179,9 +207,11 @@ class VideoPlayer(QWidget):
             return
 
         relative_frame = self.video.abs_to_rel(self.frame_num)
-        self.frame_num_label.setText(f'{self.frame_num}/{len(self.video.reader) - 1}')
+        self.frame_num_label.setText(f'{self.frame_num:04d}/{len(self.video.reader) - 1:04d}')
+        if relative_frame is None:
+            self.relative_frame_label.setText('Sync relative: --')
         self.relative_frame_label.setText(
-            f'Sync relative: {relative_frame if relative_frame is not None else "--"}')
+            f'Sync relative: {relative_frame:04d}')
 
         self.slider.setValue(self.frame_num)
         self.slider.setRange(0, len(self.video.reader) - 1)
@@ -196,6 +226,9 @@ class VideoPlayer(QWidget):
         self.image_viewer.set_image(pixmap, reset=self.video != prev_video)
         cropbox, interpolated = self.video.get_crop(self.frame_num)
         self.image_viewer.set_crop_box(cropbox, interpolated=interpolated)
+
+        frames = self.video.get_crop_frames()
+        self.slider.set_ticks([f / len(self.video) for f in frames])
 
     @requires_video
     def prev(self):
