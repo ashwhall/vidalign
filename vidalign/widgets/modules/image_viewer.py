@@ -91,6 +91,8 @@ class ImageViewer(QtWidgets.QGraphicsView):
             new_rect.moveCenter(centre)
 
         coords = [int(round(x)) for x in new_rect.getCoords()]
+        # Round to a multiple of 2
+        coords = [x - (x % 2) for x in coords]
 
         self.cropUpdated.emit(Box(*coords))
 
