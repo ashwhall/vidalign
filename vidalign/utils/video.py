@@ -134,17 +134,34 @@ class Video:
         return self._reader
 
     @property
-    def crop(self):
+    def __crop(self):
         if self._crop is None:
             self._crop = MovingCrop()
             self._crop.add_crop(0, Box(0, 0, self.reader.width, self.reader.height))
         return self._crop
 
+    def get_crop(self, frame):
+        return self.__crop.get_crop(frame)
+
+    def remove_crop(self, frame):
+        self.__crop.remove_crop(frame)
+        if len(self.__crop.crop_frames) == 0:
+            self._crop.add_crop(0, Box(0, 0, self.reader.width, self.reader.height))
+
+    def add_crop(self, frame, box):
+        self.__crop.add_crop(frame, box)
+
+    def get_maximum_crop_width(self):
+        return self.__crop.get_maximum_crop_width()
+
+    def get_maximum_crop_height(self):
+        return self.__crop.get_maximum_crop_height()
+
     def will_be_cropped(self):
         """Returns True if any of the crop frames are not the full frame"""
-        if self.crop is None:
+        if self.__crop is None:
             return False
-        return any([box.xyxy != [0, 0, self.reader.width, self.reader.height] for box in self.crop.crop_frames.values()])
+        return any([box.xyxy != [0, 0, self.reader.width, self.reader.height] for box in self.__crop.crop_frames.values()])
 
     def close(self):
         self._reader.close()
@@ -204,7 +221,7 @@ class Video:
             'alias': self.alias,
             'frame_count': len(self),
             'sync_frame': self.sync_frame,
-            'crop': self.crop.to_dict() if self.crop is not None else None,
+            'crop': self.__crop.to_dict() if self.__crop is not None else None,
         }
 
     @classmethod

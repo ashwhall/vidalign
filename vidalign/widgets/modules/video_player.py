@@ -60,9 +60,9 @@ class VideoPlayer(QWidget):
 
     def on_crop_updated(self, box: Optional[Box]):
         if box is None:
-            self.video.crop.remove_crop(self.video.reader.current_frame)
+            self.video.remove_crop(self.video.reader.current_frame)
         else:
-            self.video.crop.add_crop(self.video.reader.current_frame, box)
+            self.video.add_crop(self.video.reader.current_frame, box)
         self.frame_changed.emit(self.video.reader.current_frame)
 
     def _make_timeline_layout(self):
@@ -194,7 +194,7 @@ class VideoPlayer(QWidget):
         pixmap = QPixmap(qImg)
 
         self.image_viewer.set_image(pixmap, reset=self.video != prev_video)
-        cropbox, interpolated = self.video.crop.get_crop(self.frame_num)
+        cropbox, interpolated = self.video.get_crop(self.frame_num)
         self.image_viewer.set_crop_box(cropbox, interpolated=interpolated)
 
     @requires_video

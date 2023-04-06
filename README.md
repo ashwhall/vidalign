@@ -45,3 +45,15 @@ python vidalign/main.py;
    - You can copy-paste them elsewhere if you want to make any changes that the app can't facilitate.
 1. Run the encode commands by clicking _Run encode commands_.
 1. Have a coffee and come back when it's done!
+
+### Cropping
+
+This tool also supports spatially cropping a video over time. This is visually editable by interacting with the video player.
+
+- **Move the bounding box** by holding <ctrl>, clicking and dragging it.
+- **Resize the bounding box horizontally** by holding <ctrl> and scrolling the mouse wheel.
+- **Resize the bounding box vertically** by holding <ctrl>+<shift> and scrolling the mouse wheel.
+
+A red bounding box indicates that a bounding box has been set on the current frame. A yellow bounding box indicates that the current bounding box location is being interpolated between the previous and next annotated frames.
+
+Right-clicking on the video player will clear the bounding box for the current frame.

@@ -60,9 +60,13 @@ class ImageViewer(QtWidgets.QGraphicsView):
     def set_crop_box(self, crop_box: Optional[Box], interpolated: bool = False):
         if crop_box is not None:
             self._crop_box.setRect(*crop_box.xywh)
-            # red outline the box
-            colour = QtGui.QColor(255, 255, 0) if interpolated else QtGui.QColor(255, 0, 0)
-            self._crop_box.setPen(QtGui.QPen(colour, 4))
+
+            # Show an outline if the crop isn't full frame
+            if crop_box.xywh != [0, 0, self._photo.pixmap().width(), self._photo.pixmap().height()]:
+                colour = QtGui.QColor(255, 255, 0) if interpolated else QtGui.QColor(255, 0, 0)
+                self._crop_box.setPen(QtGui.QPen(colour, 4))
+            else:
+                self._crop_box.setPen(QtGui.QPen(QtGui.QColor(0, 0, 0, 0), 0))
             # Only add if it's not already there
             if self._crop_box not in self._scene.items():
                 self._scene.addItem(self._crop_box)

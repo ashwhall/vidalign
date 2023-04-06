@@ -77,8 +77,8 @@ class PyAV(Encoder):
             width = video.reader.width
             height = video.reader.height
             if requires_crop:
-                width = video.crop.get_maximum_crop_width()
-                height = video.crop.get_maximum_crop_height()
+                width = video.get_maximum_crop_width()
+                height = video.get_maximum_crop_height()
 
             writer = PyAVWriter(
                 output_path=self.output_path(video, clip, output_dir),
@@ -95,7 +95,7 @@ class PyAV(Encoder):
                 yield f'\rFrame {reader.current_frame - abs_start_frame} of {abs_end_frame - abs_start_frame} ({percent:.2%})'
                 frame = reader.grab()
                 if requires_crop:
-                    bounds = video.crop.get_crop(reader.current_frame)[0]
+                    bounds = video.get_crop(reader.current_frame)[0]
                     frame = frame[bounds.y0:bounds.y1+1, bounds.x0:bounds.x1+1]
                     # Resize
                     if frame.shape[0] != height or frame.shape[1] != width:
