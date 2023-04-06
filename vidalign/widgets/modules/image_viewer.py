@@ -90,9 +90,13 @@ class ImageViewer(QtWidgets.QGraphicsView):
             new_rect.setHeight(100)
             new_rect.moveCenter(centre)
 
+        # Move box to nearest integer location and ensure that its
+        # width and height are multiples of 2
         coords = [int(round(x)) for x in new_rect.getCoords()]
-        # Round to a multiple of 2
-        coords = [x - (x % 2) for x in coords]
+        if (coords[2] - coords[0]) % 2 != 0:
+            coords[2] += 1
+        if (coords[3] - coords[1]) % 2 != 0:
+            coords[3] += 1
 
         self.cropUpdated.emit(Box(*coords))
 
