@@ -55,6 +55,14 @@ class Box:
             return tuple(self.xyxy) == tuple(__value.xyxy)
         return False
 
+    def rounded(self):
+        return Box(
+            x0=int(round(self.x0)),
+            y0=int(round(self.y0)),
+            x1=int(round(self.x1)),
+            y1=int(round(self.y1)),
+        )
+
 
 @dataclass
 class MovingCrop:
@@ -84,13 +92,13 @@ class MovingCrop:
 
     def get_crop(self, frame):
         if frame in self.crop_frames:
-            return self.crop_frames[frame], False
+            return self.crop_frames[frame].rounded(), False
 
         frames = sorted(self.crop_frames.keys())
         if frame < frames[0]:
-            return self.crop_frames[frames[0]], True
+            return self.crop_frames[frames[0]].rounded(), True
         if frame > frames[-1]:
-            return self.crop_frames[frames[-1]], True
+            return self.crop_frames[frames[-1]].rounded(), True
 
         # Interpolate
         x0s = [self.crop_frames[f].x0 for f in frames]
