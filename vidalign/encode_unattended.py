@@ -47,24 +47,34 @@ def run(p):
     print('Finished!')
 
 
-def run_dir(p):
-    for f in os.listdir(p):
-        if f.endswith('.vc.json'):
-            print(f'Running {f}...')
-            run(os.path.join(p, f))
+def run_dir(p, recurse):
+    """Find files ending with .vc.json and run them, optionally recursively"""
+    paths = []
+    for root, dirs, files in os.walk(p):
+        for f in files:
+            if f.endswith('.vc.json'):
+                paths.append(os.path.join(root, f))
+        if not recurse:
+            break
+    for i, p in enumerate(paths):
+        print(f'Running for file {i+1}/{len(paths)}: {p}')
+        run(p)
+
+
+def get_yn(prompt):
+    resp = None
+    while resp not in ('y', 'n'):
+        resp = input(f'{prompt} (y/n): ').lower()
+    return resp == 'y'
 
 
 if __name__ == '__main__':
     p = argv[1]
 
     if os.path.isdir(p):
-        should_run = None
-        while should_run not in ['y', 'n']:
-            should_run = input(
-                'You selected a directory - run for each *.vc.json file in this directory? (y/n) ')
-            should_run = should_run.lower()
-        if should_run == 'y':
-            run_dir(p)
+        if get_yn('You selected a directory - run for each *.vc.json file in this directory?'):
+            recurse = get_yn('Recursively search subdirectories?')
+            run_dir(p, recurse)
         else:
             print('Exiting...')
     else:
