@@ -71,7 +71,8 @@ class ImageViewer(QtWidgets.QGraphicsView):
             if self._crop_box not in self._scene.items():
                 self._scene.addItem(self._crop_box)
         else:
-            self._scene.removeItem(self._crop_box)
+            if self._crop_box in self._scene.items():
+                self._scene.removeItem(self._crop_box)
 
     def adjust_crop_box(self, new_rect: Optional[QtCore.QRectF]):
         if new_rect is None:
