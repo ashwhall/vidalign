@@ -208,7 +208,7 @@ class Video:
 
     def rel_to_abs(self, frame):
         """Convert a sync-frame-relative frame number to absolute"""
-        if self.sync_frame is None:
+        if self.sync_frame is None or frame is None:
             return None
         return frame + self.sync_frame
 
