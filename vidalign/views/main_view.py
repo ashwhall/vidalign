@@ -46,8 +46,8 @@ class MainView(QtWidgets.QWidget):
         video_player_view = VideoPlayerView(self._model, VideoPlayerController(self._model))
         layout.addWidget(video_player_view)
 
-        config_view = ConfigView(self._model, ConfigController(self._model))
-        layout.addWidget(config_view)
+        self._config_view = ConfigView(self._model, ConfigController(self._model))
+        layout.addWidget(self._config_view)
 
         layout.setSizes((0.8 * self.width(), 0.2 * self.width()))
 
