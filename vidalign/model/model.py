@@ -1,6 +1,7 @@
 from typing import List
 from PySide6 import QtCore
 from threading import Thread
+from pathlib import Path
 from vidalign.utils.encoders.encoder import Encoder
 from vidalign.utils.encoders.encoding_task import EncodingTask
 from vidalign.utils.encoders.ffmpeg import FFmpeg
@@ -141,7 +142,8 @@ class Model(QtCore.QObject):
     @current_video.setter
     def current_video(self, value):
         if self._current_video is not None:
-            current_frame_relative = self._current_video.abs_to_rel(self.current_frame)
+            current_frame_relative = self._current_video.abs_to_rel(
+                self.current_frame)
             if value is not None and current_frame_relative is not None:
                 if (current_frame_absolute := value.rel_to_abs(current_frame_relative)):
                     self.current_frame = current_frame_absolute
@@ -203,7 +205,8 @@ class Model(QtCore.QObject):
         if not self.video_playing:
             if self.current_frame >= (len(self.current_video) - 1):
                 self.current_frame = 0
-            self._video_playback_timer.start(1000 / self.current_video.reader.fps)
+            self._video_playback_timer.start(
+                1000 / self.current_video.reader.fps)
             self.video_started.emit()
         self._video_playing = True
 
@@ -283,7 +286,8 @@ class Model(QtCore.QObject):
         max_unnamed_clip = 0
         for clip in self.clips:
             if clip.name.startswith('Clip '):
-                max_unnamed_clip = max(max_unnamed_clip, int(clip.name.split()[-1]))
+                max_unnamed_clip = max(
+                    max_unnamed_clip, int(clip.name.split()[-1]))
         self.clips = [
             *self.clips, Clip(name=f'Clip {max_unnamed_clip + 1}', start_frame=self.abs_to_rel(self.current_frame))]
 
@@ -364,7 +368,7 @@ class Model(QtCore.QObject):
         self._encoding_stdout = value
         self.encoding_progress_changed.emit(self.encoding_percentage, value)
 
-    def start_encoding_tasks(self):
+    def start_encoding_tasks(self, skip_existing=False):
         """Start the encoding tasks in a separate thread"""
         self.make_encoding_tasks()
 
@@ -373,23 +377,35 @@ class Model(QtCore.QObject):
             self.encoding_stdout_lines = []
             cancelled = False
 
-            self.encoding_stdout_lines.append('=== STARTING ENCODING TASKS ===')
+            self.encoding_stdout_lines.append(
+                '=== STARTING ENCODING TASKS ===')
             for i, task in enumerate(self.encoding_tasks):
                 self.encoding_stdout_lines.append('')
                 self.encoding_stdout_lines.append(
                     f'=== STARTING ENCODING TASK {i + 1}/{len(self.encoding_tasks)} ===')
-                self.encoding_stdout_lines.append(f'=== VIDEO: {task.video.name} ===')
+                self.encoding_stdout_lines.append(
+                    f'=== VIDEO: {task.video.name} ===')
                 self.encoding_stdout_lines.append('')
                 self.encoding_stdout_lines = self.encoding_stdout_lines
+
+                if skip_existing:
+                    # if Path(task.get_output_path(self.output_directory)).exists():
+                    if task.output_exists(self.output_directory):
+                        self.encoding_stdout_lines.append('Skipping as it already exists')
+                        self.encoding_stdout_lines = self.encoding_stdout_lines
+                        self.encoding_percentage = (i + 1) / len(self.encoding_tasks)
+                        continue
 
                 # Hold onto the stdout lines prior to starting this task, so we can repeatedly
                 # append the "updated" lines to the end of the list. Just a funny trick to handle
                 # \r characters in the output
                 pre_task_std_lines = self.encoding_stdout_lines
                 for updated_std_lines in task.run_encode_job(self.output_directory):
-                    self.encoding_stdout_lines = [*pre_task_std_lines, *updated_std_lines]
+                    self.encoding_stdout_lines = [
+                        *pre_task_std_lines, *updated_std_lines]
 
-                cancelled = cancelled or any([task.cancelled for task in self.encoding_tasks])
+                cancelled = cancelled or any(
+                    [task.cancelled for task in self.encoding_tasks])
                 if cancelled:
                     break
 
@@ -429,7 +445,8 @@ class Model(QtCore.QObject):
         if 'encoders' in data:
             for key, data in data['encoders'].items():
                 try:
-                    idx = next(i for i, encoder in enumerate(self.encoders) if encoder.name == key)
+                    idx = next(i for i, encoder in enumerate(
+                        self.encoders) if encoder.name == key)
                     self.encoders[idx].update_from_dict(data)
                 except IndexError:
                     print(f'WARNING: No encoder found with name {key}')

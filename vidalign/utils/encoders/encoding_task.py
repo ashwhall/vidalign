@@ -1,8 +1,10 @@
 import subprocess
+from pathlib import Path
 from typing import List
 from dataclasses import dataclass
 
 from vidalign.utils.video import Video
+from vidalign.utils.video_reader import VideoReader
 from vidalign.utils.clip import Clip
 from vidalign.utils.encoders import Encoder
 
@@ -15,6 +17,17 @@ class EncodingTask:
     processing: bool = False
     cancelled: bool = False
     stdout_lines: List[str] = None
+
+    def output_exists(self, output_dir):
+        output_path = self.get_output_path(output_dir)
+        if Path(output_path).exists():
+            video = VideoReader(output_path)
+            if len(video) == len(self.clip):
+                return True
+        return False
+
+    def get_output_path(self, output_dir):
+        return self.encoder.output_path(self.video, self.clip, output_dir)
 
     def get_encode_command(self, output_dir):
         return self.encoder.get_encode_command(self.video, self.clip, output_dir)
@@ -41,7 +54,8 @@ class EncodingTask:
                 yield self.stdout_lines
             self.video.close()
         else:
-            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            proc = subprocess.Popen(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
             self.stdout_lines = []
             string_buffer = ''

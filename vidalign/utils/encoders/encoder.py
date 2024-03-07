@@ -17,7 +17,7 @@ class Encoder(ABC):
             if self.value:
                 return [self.flag, self.value]
             return []
-        
+
         def to_dict(self):
             return {
                 'flag': self.flag,
@@ -25,7 +25,7 @@ class Encoder(ABC):
                 'default': self.default,
                 'hint': self.hint
             }
-        
+
         @classmethod
         def from_dict(cls, data):
             return cls(
@@ -48,9 +48,13 @@ class Encoder(ABC):
         Constructed like {output_dir}/{clip_name}_{video_alias}
         """
         return os.path.join(output_dir, f'{clip.name.replace(" ", "_")}_{video.alias.replace(" ", "_")}')
-    
+
     @abstractmethod
     def get_encode_command(self, video, clip, output_dir):
+        pass
+
+    @abstractmethod
+    def output_path(self, video, clip, output_dir):
         pass
 
     def to_dict(self):
