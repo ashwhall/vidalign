@@ -39,6 +39,7 @@ class EncodingTask:
 
                 self.stdout_lines.append(output_line.strip())
                 yield self.stdout_lines
+            self.video.close()
         else:
             proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
@@ -63,6 +64,8 @@ class EncodingTask:
             if string_buffer and not self.cancelled:
                 self.stdout_lines.append(string_buffer.strip())
                 yield self.stdout_lines
+
+            self.video.close()
 
         self.processing = False
 

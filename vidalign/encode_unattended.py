@@ -33,6 +33,8 @@ def run(p):
 
     model.start_encoding_tasks()
 
+    sleep(0.25)
+
     def fmt_line(percent, line):
         return f'Total: {int(round(percent * 100))}% | Task: {line}'
 
@@ -72,7 +74,7 @@ if __name__ == '__main__':
     if len(argv) < 2:
         print('Usage: python3 vidalign/encode_unattended.py path/to/config.vc.json')
         exit(1)
-        
+
     p = argv[1]
 
     if os.path.isdir(p):

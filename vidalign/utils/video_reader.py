@@ -28,9 +28,12 @@ class VideoReader:
         self._closed = False
 
     def close(self):
-        if getattr(self, 'vr', None) is not None:
+        if getattr(self, '_cap', None) is not None:
             self._cap.release()
             del self._cap
+        del self.cached_frame
+        self.cached_frame = None
+        self.cached_frame_number = -1
         self._closed = True
 
     def grab(self, frame=None):

@@ -33,6 +33,9 @@ class PyAVWriter:
         self.stream.options = {'crf': str(crf), 'preset': 'faster'}
 
     def write(self, frame):
+        if not hasattr(self, 'container') or not hasattr(self, 'stream'):
+            raise RuntimeError('Writer has been released')
+
         frame = av.VideoFrame.from_ndarray(frame, format='rgb24')
         for packet in self.stream.encode(frame):
             self.container.mux(packet)
@@ -44,6 +47,9 @@ class PyAVWriter:
 
         # Close the file
         self.container.close()
+
+        del self.container
+        del self.stream
 
 
 class PyAV(Encoder):
@@ -65,6 +71,12 @@ class PyAV(Encoder):
 
     def get_encode_command(self, video: Video, clip: Clip, output_dir: str):
         writer = None
+
+        def _release_writer():
+            nonlocal writer
+            if writer:
+                writer.release()
+                del writer
 
         def _run_encode():
             nonlocal writer
@@ -115,13 +127,11 @@ class PyAV(Encoder):
                 writer.write(frame)
                 reader.step()
 
-            writer.release()
-
+            _release_writer()
             yield f'\rDone writing {self.output_path(video, clip, output_dir)}'
 
         def _cancel_encode():
-            if writer:
-                writer.release()
+            _release_writer()
 
         def _get_funcs():
             return _run_encode, _cancel_encode
