@@ -8,6 +8,9 @@ from vidalign.utils.clip import Clip
 from vidalign.utils.encoders import Encoder
 from vidalign.utils.video import Video
 
+# TODO: This has a memory leak, which requires further investigation. It doesn't occur when
+# using the FFMPEG encoder, so it must be isolated somewhere here.
+
 
 class PyAVWriter:
     def __init__(self, output_path: str, codec: str, crf: int, frame_rate: float, width: int, height: int):
