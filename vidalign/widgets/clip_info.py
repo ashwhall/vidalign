@@ -50,7 +50,8 @@ class ClipInfo(QFrame):
 
         layout.addLayout(self.make_set_jump_buttons(
             'Start:', self.set_clip_start, self.jump_clip_start))
-        layout.addLayout(self.make_set_jump_buttons('End:', self.set_clip_end, self.jump_clip_end))
+        layout.addLayout(self.make_set_jump_buttons(
+            'End:', self.set_clip_end, self.jump_clip_end))
 
         return layout
 
@@ -63,12 +64,15 @@ class ClipInfo(QFrame):
         layout.addWidget(new_button)
 
         rename_button = StyledButton('Rename Clip')
-        rename_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        rename_button.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding)
         rename_button.clicked.connect(self.rename_clip.emit)
         layout.addWidget(rename_button)
 
-        delete_button = StyledButton('Delete Clip', StyledButton.Style.NEGATIVE)
-        delete_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        delete_button = StyledButton(
+            'Delete Clip', StyledButton.Style.NEGATIVE)
+        delete_button.setSizePolicy(
+            QSizePolicy.Expanding, QSizePolicy.Expanding)
         delete_button.clicked.connect(self.delete_clip.emit)
         layout.addWidget(delete_button)
 
@@ -93,7 +97,7 @@ class ClipInfo(QFrame):
         return layout
 
     def update_ui(self):
-        if self.clip:
+        if self.clip is not None:
             self.label.setText(f'Selected: {self.clip.name}')
         else:
             self.label.setText('No clip selected')

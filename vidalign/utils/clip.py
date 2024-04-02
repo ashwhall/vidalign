@@ -25,6 +25,8 @@ class Clip:
         self._end_frame = value
 
     def __len__(self):
+        if self.end_frame is None:
+            return 0
         return self.end_frame - self.start_frame + 1
 
     def complete(self):

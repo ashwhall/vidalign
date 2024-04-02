@@ -25,20 +25,22 @@ class ClipInfoController(QtCore.QObject):
 
     @QtCore.Slot(int)
     def on_set_clip_start(self):
-        if self._model.current_clip:
+        if self._model.current_clip is not None:
             self._model.set_clip_start(self._model.current_clip)
 
     @QtCore.Slot(int)
     def on_set_clip_end(self):
-        if self._model.current_clip:
+        if self._model.current_clip is not None:
             self._model.set_clip_end(self._model.current_clip)
 
     @QtCore.Slot(int)
     def on_jump_clip_start(self):
-        if self._model.current_clip:
-            self._model.seek_absolute_frame_rel(self._model.current_clip.start_frame)
+        if self._model.current_clip is not None:
+            self._model.seek_absolute_frame_rel(
+                self._model.current_clip.start_frame)
 
     @QtCore.Slot(int)
     def on_jump_clip_end(self):
-        if self._model.current_clip:
-            self._model.seek_absolute_frame_rel(self._model.current_clip.end_frame)
+        if self._model.current_clip is not None:
+            self._model.seek_absolute_frame_rel(
+                self._model.current_clip.end_frame)

@@ -25,18 +25,21 @@ class ClipInfoView(QtWidgets.QWidget):
         self._clip_info.rename_clip.connect(self.on_rename_clip)
         self._clip_info.delete_clip.connect(self._controller.on_delete_clip)
 
-        self._clip_info.set_clip_start.connect(self._controller.on_set_clip_start)
+        self._clip_info.set_clip_start.connect(
+            self._controller.on_set_clip_start)
         self._clip_info.set_clip_end.connect(self._controller.on_set_clip_end)
 
-        self._clip_info.jump_clip_start.connect(self._controller.on_jump_clip_start)
-        self._clip_info.jump_clip_end.connect(self._controller.on_jump_clip_end)
+        self._clip_info.jump_clip_start.connect(
+            self._controller.on_jump_clip_start)
+        self._clip_info.jump_clip_end.connect(
+            self._controller.on_jump_clip_end)
 
         # Listen for model event signals
         self._model.current_clip_changed.connect(self.on_current_clip_changed)
 
     @QtCore.Slot()
     def on_rename_clip(self):
-        if not self._model.current_clip:
+        if not self._model.current_clip is not None:
             return
 
         dialog = TextFieldDialog('Clip name', self._model.current_clip.name)
