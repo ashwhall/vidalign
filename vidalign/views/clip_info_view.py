@@ -1,8 +1,8 @@
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtCore, QtWidgets
 
 from vidalign.controllers import ClipInfoController
-from vidalign.widgets import ClipInfo, TextFieldDialog
 from vidalign.model import Model
+from vidalign.widgets import ClipInfo, TextFieldDialog
 
 
 class ClipInfoView(QtWidgets.QWidget):
@@ -28,6 +28,9 @@ class ClipInfoView(QtWidgets.QWidget):
         self._clip_info.set_clip_start.connect(
             self._controller.on_set_clip_start)
         self._clip_info.set_clip_end.connect(self._controller.on_set_clip_end)
+
+        self._clip_info.set_clip_duration.connect(
+            self._controller.on_set_clip_duration)
 
         self._clip_info.jump_clip_start.connect(
             self._controller.on_jump_clip_start)

@@ -31,7 +31,13 @@ class ClipInfoController(QtCore.QObject):
     @QtCore.Slot(int)
     def on_set_clip_end(self):
         if self._model.current_clip is not None:
-            self._model.set_clip_end(self._model.current_clip)
+            self._model.set_clip_end(
+                self._model.current_clip)
+
+    @QtCore.Slot(int)
+    def on_set_clip_duration(self, duration: int):
+        if self._model.current_clip is not None and not self._model.current_clip.start_frame is None:
+            self._model.set_clip_duration(self._model.current_clip, duration)
 
     @QtCore.Slot(int)
     def on_jump_clip_start(self):

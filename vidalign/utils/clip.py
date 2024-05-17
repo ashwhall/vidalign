@@ -29,6 +29,10 @@ class Clip:
             return 0
         return self.end_frame - self.start_frame + 1
 
+    @property
+    def duration(self):
+        return max(0, len(self) - 1)
+
     def complete(self):
         return self.name is not None and self.start_frame is not None and self.end_frame is not None
 

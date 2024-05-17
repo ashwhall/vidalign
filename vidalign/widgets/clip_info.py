@@ -1,8 +1,17 @@
 from PySide6 import QtCore
-from PySide6.QtWidgets import (QLabel, QFrame,
-                               QHBoxLayout, QVBoxLayout, QSizePolicy)
+from PySide6.QtWidgets import (QErrorMessage, QFrame, QHBoxLayout, QLabel,
+                               QSizePolicy, QVBoxLayout)
+
 from vidalign.constants import COLOURS
 from vidalign.widgets.modules import StyledButton
+from vidalign.widgets.text_field_dialog import TextFieldDialog
+
+
+def err_dlg(msg):
+    error_dialog = QErrorMessage()
+    error_dialog.showMessage(msg)
+    error_dialog.exec()
+    return
 
 
 class ClipInfo(QFrame):
@@ -12,6 +21,7 @@ class ClipInfo(QFrame):
 
     set_clip_start = QtCore.Signal()
     set_clip_end = QtCore.Signal()
+    set_clip_duration = QtCore.Signal(int)
 
     jump_clip_start = QtCore.Signal()
     jump_clip_end = QtCore.Signal()
@@ -41,6 +51,25 @@ class ClipInfo(QFrame):
 
         self.setLayout(self.layout)
 
+    def prompt_clip_duration(self):
+        if self.clip.start_frame is None:
+            return err_dlg('Cannot set duration without a start frame.')
+
+        # A wrapper function to set the clip duration
+        def set_signal(duration):
+            try:
+                duration = int(duration)
+            except ValueError:
+                return err_dlg('Duration must be an integer.')
+            if duration < 1:
+                return err_dlg('Duration must be at least 1 frame.')
+            self.set_clip_duration.emit(duration)
+
+        dialog = TextFieldDialog(
+            'Clip Duration (frames)', str(self.clip.duration))
+        dialog.submitted.connect(set_signal)
+        dialog.exec()
+
     def make_top_layout(self):
         layout = QHBoxLayout()
 
@@ -52,6 +81,8 @@ class ClipInfo(QFrame):
             'Start:', self.set_clip_start, self.jump_clip_start))
         layout.addLayout(self.make_set_jump_buttons(
             'End:', self.set_clip_end, self.jump_clip_end))
+
+        layout.addLayout(self.make_set_duration_button())
 
         return layout
 
@@ -93,6 +124,16 @@ class ClipInfo(QFrame):
         jump_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         jump_button.clicked.connect(jump_signal)
         layout.addWidget(jump_button)
+
+        return layout
+
+    def make_set_duration_button(self):
+        layout = QHBoxLayout()
+
+        set_button = StyledButton('Set Duration', StyledButton.Style.PRIMARY)
+        set_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        set_button.clicked.connect(self.prompt_clip_duration)
+        layout.addWidget(set_button)
 
         return layout
 

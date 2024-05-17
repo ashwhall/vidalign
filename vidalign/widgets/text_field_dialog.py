@@ -1,6 +1,7 @@
 from PySide6 import QtCore
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QLabel, QDialog, QDialogButtonBox, QVBoxLayout, QLineEdit)
+from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QLabel, QLineEdit,
+                               QVBoxLayout)
 
 
 class TextFieldDialog(QDialog):

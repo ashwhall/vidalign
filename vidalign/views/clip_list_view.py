@@ -1,4 +1,4 @@
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtCore, QtWidgets
 
 from vidalign.controllers import ClipListController
 from vidalign.model import Model
@@ -14,11 +14,12 @@ class ClipListView(QtWidgets.QWidget):
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
-        
+
         self._table = TableWidget([
-            TableWidget.Column('Clip', 'name', 0.5),
-            TableWidget.Column('Start', 'start_frame', 0.25),
-            TableWidget.Column('End', 'end_frame', 0.25)
+            TableWidget.Column('Clip', 'name', 0.4),
+            TableWidget.Column('Start', 'start_frame', 0.2),
+            TableWidget.Column('End', 'end_frame', 0.2),
+            TableWidget.Column('Duration', 'duration', 0.2)
         ], self._model.clips)
         self.layout.addWidget(self._table)
         self.setLayout(self.layout)

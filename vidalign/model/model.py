@@ -1,13 +1,15 @@
-from typing import List
-from PySide6 import QtCore
-from threading import Thread
 from pathlib import Path
+from threading import Thread
+from typing import List
+
+from PySide6 import QtCore
+
+from vidalign.utils.clip import Clip
 from vidalign.utils.encoders.encoder import Encoder
 from vidalign.utils.encoders.encoding_task import EncodingTask
 from vidalign.utils.encoders.ffmpeg import FFmpeg
 from vidalign.utils.encoders.pyav import PyAV
 from vidalign.utils.video import Video
-from vidalign.utils.clip import Clip
 
 
 class Model(QtCore.QObject):
@@ -323,6 +325,13 @@ class Model(QtCore.QObject):
             clip.end_frame = rel_frame
         self.clips = self.clips
 
+    def set_clip_duration(self, clip, duration: int):
+        if clip.start_frame is None:
+            return
+
+        clip.end_frame = clip.start_frame + duration
+        self.clips = self.clips
+
     def video_clip_dict(self):
         return {
             'videos': [v.to_dict() for v in self.videos],
@@ -391,9 +400,11 @@ class Model(QtCore.QObject):
                 if skip_existing:
                     # if Path(task.get_output_path(self.output_directory)).exists():
                     if task.output_exists(self.output_directory):
-                        self.encoding_stdout_lines.append('Skipping as it already exists')
+                        self.encoding_stdout_lines.append(
+                            'Skipping as it already exists')
                         self.encoding_stdout_lines = self.encoding_stdout_lines
-                        self.encoding_percentage = (i + 1) / len(self.encoding_tasks)
+                        self.encoding_percentage = (
+                            i + 1) / len(self.encoding_tasks)
                         continue
 
                 # Hold onto the stdout lines prior to starting this task, so we can repeatedly
