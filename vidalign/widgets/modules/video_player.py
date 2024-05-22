@@ -4,8 +4,8 @@ from typing import Optional
 from PySide6 import QtCore
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFontDatabase, QImage, QKeySequence, QPixmap
-from PySide6.QtWidgets import (QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout,
-                               QWidget)
+from PySide6.QtWidgets import (QHBoxLayout, QLabel, QSizePolicy, QSpinBox,
+                               QVBoxLayout, QWidget)
 
 from vidalign.utils.video import Box, Video
 from vidalign.widgets.modules import ImageViewer, StyledButton
@@ -42,6 +42,7 @@ class VideoPlayer(QWidget):
         self.frame_num = None
 
         self.is_playing = False
+        self.jump_size = 10
 
         self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
 
@@ -111,7 +112,8 @@ class VideoPlayer(QWidget):
         # Frame jumping
         big_prev_frame_button = self.Button(text='←←\nA')
         big_prev_frame_button.setShortcut(QKeySequence('shift+a'))
-        big_prev_frame_button.clicked.connect(lambda: self.seek_relative(-10))
+        big_prev_frame_button.clicked.connect(
+            lambda: self.seek_relative(-self.jump_size))
         layout.addWidget(big_prev_frame_button)
 
         prev_frame_button = self.Button(text='←\na')
@@ -131,8 +133,18 @@ class VideoPlayer(QWidget):
 
         big_next_frame_button = self.Button(text='→→\nD')
         big_next_frame_button.setShortcut(QKeySequence('shift+d'))
-        big_next_frame_button.clicked.connect(lambda: self.seek_relative(10))
+        big_next_frame_button.clicked.connect(
+            lambda: self.seek_relative(self.jump_size))
         layout.addWidget(big_next_frame_button)
+
+        jump_size_label = QLabel('Jump size:')
+        layout.addWidget(jump_size_label)
+        jump_size_input = QSpinBox()
+        jump_size_input.setRange(1, 1000)
+        jump_size_input.setValue(self.jump_size)
+        jump_size_input.setSingleStep(5)
+        layout.addWidget(jump_size_input)
+        jump_size_input.valueChanged.connect(self.set_jump_size)
 
         return layout
 
@@ -162,6 +174,9 @@ class VideoPlayer(QWidget):
 
     def play_callback(self):
         self.seek_relative(1, False)
+
+    def set_jump_size(self, size: int):
+        self.jump_size = size
 
     def slider_callback(self, value):
         if not self.is_playing:
