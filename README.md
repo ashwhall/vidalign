@@ -12,7 +12,7 @@ conda activate vidalign;
 ## Usage
 
 ```bash
-python vidalign/main.py;
+python -m vidalign;
 ```
 
 ### Overview
