@@ -1,12 +1,14 @@
+from math import ceil, log10
 from typing import Optional
+
 from PySide6 import QtCore
-from PySide6.QtCore import (Qt, QTimer)
-from PySide6.QtWidgets import (QLabel, QHBoxLayout,
-                               QVBoxLayout, QWidget, QSizePolicy)
-from PySide6.QtGui import QImage, QPixmap, QKeySequence
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QFontDatabase, QImage, QKeySequence, QPixmap
+from PySide6.QtWidgets import (QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout,
+                               QWidget)
 
 from vidalign.utils.video import Box, Video
-from vidalign.widgets.modules import StyledButton, ImageViewer
+from vidalign.widgets.modules import ImageViewer, StyledButton
 from vidalign.widgets.modules.tick_slider import TickSlider
 
 
@@ -68,17 +70,24 @@ class VideoPlayer(QWidget):
 
     def _make_timeline_layout(self):
         layout = QHBoxLayout()
+        # Frame labels needs a mono font to avoid resizing
+        mono_font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
+
         self.frame_num_label = QLabel('??/??')
+        self.frame_num_label.setToolTip('Current frame/total frames')
+        self.frame_num_label.setFont(mono_font)
         layout.addWidget(self.frame_num_label)
 
-        # Add a slider
         self.slider = TickSlider(Qt.Horizontal)
         self.slider.setRange(0, 1)
         self.slider.setValue(0)
         self.slider.sliderMoved.connect(self.seek_absolute)
         layout.addWidget(self.slider)
 
-        self.relative_frame_label = QLabel('Sync relative: --')
+        self.relative_frame_label = QLabel('Sync rel: --')
+        self.relative_frame_label.setToolTip(
+            'Current frame, relative to the sync frame')
+        self.relative_frame_label.setFont(mono_font)
         layout.addWidget(self.relative_frame_label)
         return layout
 
@@ -196,7 +205,7 @@ class VideoPlayer(QWidget):
         self.frame_num = None
         self.frame_num_label.setText('??/??')
         self.slider.setValue(0)
-        self.relative_frame_label.setText('Sync relative: --')
+        self.relative_frame_label.setText('Sync rel: --')
 
     def draw(self, video: Video = None, frame_num: int = None):
         self.frame_num = frame_num if frame_num is not None else self.frame_num
@@ -207,12 +216,16 @@ class VideoPlayer(QWidget):
             return
 
         relative_frame = self.video.abs_to_rel(self.frame_num)
-        self.frame_num_label.setText(f'{self.frame_num:04d}/{len(self.video.reader) - 1:04d}')
+        # Get the number of digits in the frame count
+        n_dig = ceil(log10(len(self.video.reader)))
+        fmt = f'{{:>{n_dig}d}}'
+        self.frame_num_label.setText(
+            f'{fmt.format(self.frame_num)}/{fmt.format(len(self.video.reader))}')
         if relative_frame is None:
-            self.relative_frame_label.setText('Sync relative: --')
+            self.relative_frame_label.setText('Sync rel: --')
         else:
             self.relative_frame_label.setText(
-                f'Sync relative: {relative_frame:04d}')
+                f'Sync rel: {fmt.format(relative_frame)}')
 
         self.slider.setValue(self.frame_num)
         self.slider.setRange(0, len(self.video.reader) - 1)

@@ -1,9 +1,11 @@
-from PySide6 import QtWidgets, QtCore
 from typing import List
+
+from PySide6 import QtCore, QtWidgets
+
 from vidalign.constants import COLOURS
 from vidalign.utils.encoders.encoder import Encoder
 from vidalign.widgets import EncodingProgressDialog
-from vidalign.widgets.modules import StyledButton, EncoderOptionsDialog
+from vidalign.widgets.modules import EncoderOptionsDialog, StyledButton
 
 
 class EncodingConfig(QtWidgets.QFrame):
@@ -58,8 +60,10 @@ class EncodingConfig(QtWidgets.QFrame):
         self.encoder_dropdown = QtWidgets.QComboBox()
         encoder_names = [enc.name for enc in self._encoders]
         self.encoder_dropdown.addItems(encoder_names)
-        self.encoder_dropdown.setCurrentIndex(encoder_names.index(self._current_encoder.name))
-        self.encoder_dropdown.currentIndexChanged.connect(self._on_encoder_idx_changed)
+        self.encoder_dropdown.setCurrentIndex(
+            encoder_names.index(self._current_encoder.name))
+        self.encoder_dropdown.currentIndexChanged.connect(
+            self._on_encoder_idx_changed)
         encoder_layout.addWidget(self.encoder_dropdown)
         layout.addLayout(encoder_layout)
 
@@ -109,8 +113,10 @@ class EncodingConfig(QtWidgets.QFrame):
             # Display the commands in a dialog, one per line
             self.encoding_dialog = EncodingProgressDialog(
                 self._output_dir, percentage, stdout_lines)
-            self.encoding_dialog.on_cancel_encode.connect(self.on_cancel_encode)
-            self.encoding_dialog.on_finalise_encoding.connect(self.on_finalise_encoding)
+            self.encoding_dialog.on_cancel_encode.connect(
+                self.on_cancel_encode)
+            self.encoding_dialog.on_finalise_encoding.connect(
+                self.on_finalise_encoding)
             self.encoding_dialog.exec()
         elif self.encoding_dialog and percentage is not None:
             # Update the dialog contents
@@ -125,12 +131,14 @@ class EncodingConfig(QtWidgets.QFrame):
         encoder_names = [enc.name for enc in self._encoders]
         self.encoder_dropdown.clear()
         self.encoder_dropdown.addItems(encoder_names)
-        self.encoder_dropdown.setCurrentIndex(encoder_names.index(self._current_encoder.name))
+        self.encoder_dropdown.setCurrentIndex(
+            encoder_names.index(self._current_encoder.name))
 
     def _update_current_encoder(self, encoder):
         self._current_encoder = encoder
         encoder_names = [enc.name for enc in self._encoders]
-        self.encoder_dropdown.setCurrentIndex(encoder_names.index(self._current_encoder.name))
+        self.encoder_dropdown.setCurrentIndex(
+            encoder_names.index(self._current_encoder.name))
 
     @QtCore.Slot()
     def _on_encoder_idx_changed(self, idx):
@@ -140,5 +148,6 @@ class EncodingConfig(QtWidgets.QFrame):
     def on_open_encoder_options(self):
         # Display the commands in a dialog, one per line
         self.options_dialog = EncoderOptionsDialog(self._current_encoder)
-        self.options_dialog.on_save_encoder_options.connect(self.on_encoder_changed)
+        self.options_dialog.on_save_encoder_options.connect(
+            self.on_encoder_changed)
         self.options_dialog.exec()
