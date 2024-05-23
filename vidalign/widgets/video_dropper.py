@@ -1,9 +1,11 @@
+import fnmatch
 import os
 
 from PySide6 import QtCore
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QLabel,
-                               QHBoxLayout, QWidget, QSizePolicy)
+from PySide6.QtWidgets import (QLabel, QLineEdit, QSizePolicy, QVBoxLayout,
+                               QWidget)
+
 from vidalign.constants import COLOURS
 
 
@@ -21,7 +23,7 @@ class VideoDropper(QWidget):
         super().__init__()
         self.setAcceptDrops(True)
 
-        self.layout = QHBoxLayout()
+        self.layout = QVBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
 
@@ -38,11 +40,19 @@ class VideoDropper(QWidget):
         self.minimumWidth = 150
         self.label.setMinimumWidth(self.minimumWidth)
 
+        # A filter text field
+        self.filter_field = QLineEdit(self)
+        self.filter_field.setPlaceholderText('Filter')
+        self.filter_field.setToolTip(
+            'Filter videos by filename, use * for wildcard. Default is *')
+        self.filter_field.setMinimumWidth(self.minimumWidth)
+        self.layout.addWidget(self.filter_field)
+
         self.setLayout(self.layout)
 
     def set_style(self, style):
         self.setStyleSheet(f"""
-            QWidget {{
+            QLabel {{
                 border: 3px dashed {COLOURS[style]};
                 border-radius: 5px;
             }}
@@ -64,17 +74,32 @@ class VideoDropper(QWidget):
         else:
             event.ignore()
 
-    @classmethod
-    def video_urls_from_event(cls, event):
+    def matches_filter(self, filename: str):
+        """Returns True if the filename matches the filter"""
+        filter_text = self.filter_field.text()
+        if not filter_text:
+            return True
+
+        return fnmatch.fnmatch(filename, filter_text)
+
+    def video_urls_from_event(self, event):
         """Get the fully-resolved paths of the dropped files, descending directories if necessary."""
         urls = []
-        event_urls = [str(url.toLocalFile()) for url in event.mimeData().urls()]
+        event_urls = [str(url.toLocalFile())
+                      for url in event.mimeData().urls()]
 
         idx = 0
         while idx < len(event_urls):
             url = event_urls[idx]
-            if url.lower().endswith(cls.ACCEPTED_EXTENSIONS):
-                urls.append(url)
+            basename = os.path.basename(url)
+            # Ignore hidden files/folders
+            if basename.startswith('.'):
+                idx += 1
+                continue
+
+            if os.path.isfile(url) and url.lower().endswith(self.ACCEPTED_EXTENSIONS):
+                if self.matches_filter(basename):
+                    urls.append(url)
             elif os.path.isdir(url):
                 event_urls.extend([
                     os.path.join(url, sub_url)

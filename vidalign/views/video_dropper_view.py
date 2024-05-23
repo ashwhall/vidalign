@@ -1,4 +1,5 @@
 from PySide6 import QtWidgets
+from PySide6.QtCore import Slot
 
 from vidalign.controllers import VideoDropperController
 from vidalign.model import Model
@@ -17,8 +18,10 @@ class VideoDropperView(QtWidgets.QWidget):
         self.setLayout(self.layout)
 
         self.connect_signals()
-        
 
     def connect_signals(self):
-        # Connect widgets to controller
-        self._video_dropper.videos_dropped.connect(self._controller.on_videos_dropped)
+        self._video_dropper.videos_dropped.connect(self._on_videos_dropped)
+
+    @Slot(list)
+    def _on_videos_dropped(self, value):
+        self._controller.on_videos_dropped(value)
