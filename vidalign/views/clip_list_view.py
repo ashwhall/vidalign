@@ -29,6 +29,8 @@ class ClipListView(QtWidgets.QWidget):
     def connect_signals(self):
         # Connect widgets to controller
         self._table.item_selected.connect(self._controller.on_clip_selected)
+        self._table.item_double_clicked.connect(
+            self._controller.on_clip_double_clicked)
 
         # Listen for model event signals
         self._model.clip_list_changed.connect(self.on_clip_list_changed)

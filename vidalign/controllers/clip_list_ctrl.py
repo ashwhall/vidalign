@@ -10,5 +10,11 @@ class ClipListController(QtCore.QObject):
         self._model = model
 
     @QtCore.Slot(list)
-    def on_clip_selected(self, value):
-        self._model.current_clip = value
+    def on_clip_selected(self, clip):
+        self._model.current_clip = clip
+
+    @QtCore.Slot(list)
+    def on_clip_double_clicked(self, clip):
+        if clip is not None:
+            self._model.seek_absolute_frame_rel(
+                clip.start_frame)
