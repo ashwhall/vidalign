@@ -4,6 +4,8 @@ A tool to perform multi-camera video temporal alignment and clip extraction.
 
 ## Installation
 
+Install Anaconda [here](https://www.anaconda.com/download/success) or Miniconda [here](https://docs.anaconda.com/free/miniconda/miniconda-install/), then run the following commands:
+
 ```bash
 conda env create -f environment.yml;
 conda activate vidalign;
