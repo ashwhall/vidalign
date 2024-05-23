@@ -33,9 +33,10 @@ python -m vidalign;
 ### Workflow
 
 1. Load some videos by dragging them onto the video dropper.
+   1. You can optionally filter the video filenames using the text box.
 1. For each video:
    1. Select it and click _Set alias_. Give it a recognisable name like "left_camera".
-   1. Scrub through the video and find a frame with a clearly visible even which can be used for time-synchronisation across cameras. Click _Set sync frame_.
+   1. Scrub through the video and find a frame with a clearly visible event which can be used for time-synchronisation across cameras. Click _Set sync frame_. Typically you would use the flash of a light or a clap.
 1. For each desired clip:
    1. Click _New clip_. The clip's start frame will be automatically set at the current frame, but this can be changed by navigating to the desired frame and clicking _Set_; same goes for the end frame.
    1. Rename the clip to something recognisable like "calibration" or "run_1".
@@ -43,8 +44,10 @@ python -m vidalign;
    - Save the videos/clips configuration to file if you want to be safe.
 1. Open up the encoder options and check that you're happy with them.
    - Instead you can load a previous encoder configuration from file if you have one prepared.
+   - I like using PyAV for encoding, but FFmpeg is also a good choice as it's more tried and tested.
 1. View the encoder commands to check that everything is as expected.
    - You can copy-paste them elsewhere if you want to make any changes that the app can't facilitate.
+   - This is only available for FFmpeg at the moment.
 1. Run the encode commands by clicking _Run encode commands_.
 1. Have a coffee and come back when it's done!
 
@@ -59,3 +62,7 @@ This tool also supports spatially cropping a video over time. This is visually e
 A red bounding box indicates that a bounding box has been set on the current frame. A yellow bounding box indicates that the current bounding box location is being interpolated between the previous and next annotated frames.
 
 Right-clicking on the video player will clear the bounding box for the current frame.
+
+### Contributing
+
+Please feel free to open an issue or pull request if you have any suggestions or find any bugs.
