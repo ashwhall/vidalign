@@ -106,16 +106,16 @@ class ClipInfo(QFrame):
     def make_right_layout(self):
         layout = QVBoxLayout()
 
+        set_button = StyledButton('Set Duration')
+        set_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        set_button.clicked.connect(self.prompt_clip_duration)
+        layout.addWidget(set_button)
+
         rename_button = StyledButton('Rename Clip')
         rename_button.setSizePolicy(
             QSizePolicy.Expanding, QSizePolicy.Expanding)
         rename_button.clicked.connect(self.rename_clip.emit)
         layout.addWidget(rename_button)
-
-        set_button = StyledButton('Set Duration', StyledButton.Style.PRIMARY)
-        set_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        set_button.clicked.connect(self.prompt_clip_duration)
-        layout.addWidget(set_button)
 
         return layout
 
