@@ -3,7 +3,7 @@ from ipaddress import collapse_addresses
 from typing import Generic, List, Type, TypeVar
 
 from PySide6 import QtCore, QtGui, QtWidgets
-from PySide6.QtWidgets import QTableWidget, QTableWidgetItem
+from PySide6.QtWidgets import QStyle, QTableWidget, QTableWidgetItem
 
 T = TypeVar('T')
 
@@ -99,7 +99,9 @@ class TableWidget(QTableWidget, Generic[T]):
                         self.setRowHeight(i, value.height())
 
             if i == self.selected_row:
-                self.setVerticalHeaderItem(i, QTableWidgetItem('>'))
+                itm = QTableWidgetItem()
+                itm.setIcon(self.style().standardPixmap(QStyle.SP_ArrowRight))
+                self.setVerticalHeaderItem(i, itm)
                 if requires_refresh:
                     self.selectRow(i)
             else:
