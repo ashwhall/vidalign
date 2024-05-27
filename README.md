@@ -8,12 +8,12 @@ Install Anaconda [here](https://www.anaconda.com/download/success) or Miniconda 
 
 ```bash
 conda env create -f environment.yml;
-conda activate vidalign;
 ```
 
 ## Usage
 
 ```bash
+conda activate vidalign;
 python -m vidalign;
 ```
 
