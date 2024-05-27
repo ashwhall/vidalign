@@ -35,6 +35,7 @@ class ClipInfo(QFrame):
 
         self.layout.addLayout(self.make_left_layout())
         self.layout.addLayout(self.make_middle_layout())
+        self.layout.addLayout(self.make_righter_layout())
         self.layout.addLayout(self.make_right_layout())
 
         self.update_ui()
@@ -75,21 +76,15 @@ class ClipInfo(QFrame):
         layout = QVBoxLayout()
 
         self.label = QLabel()
-        layout.addWidget(self.label)
         self.label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
-        btn_layout = QHBoxLayout()
+        layout.addWidget(self.label)
 
         new_button = StyledButton('New Clip', StyledButton.Style.POSITIVE)
+        new_button.setSizePolicy(
+            QSizePolicy.Fixed, QSizePolicy.Expanding)
+        new_button.setMinimumWidth(120)
         new_button.clicked.connect(self.new_clip.emit)
-        btn_layout.addWidget(new_button)
-
-        delete_button = StyledButton(
-            'Delete Clip', StyledButton.Style.NEGATIVE)
-        delete_button.clicked.connect(self.delete_clip.emit)
-        btn_layout.addWidget(delete_button)
-
-        layout.addLayout(btn_layout)
+        layout.addWidget(new_button)
 
         return layout
 
@@ -103,17 +98,32 @@ class ClipInfo(QFrame):
 
         return layout
 
-    def make_right_layout(self):
+    def make_righter_layout(self):
         layout = QVBoxLayout()
 
         set_button = StyledButton('Set Duration')
-        set_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        set_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        set_button.setMinimumWidth(120)
         set_button.clicked.connect(self.prompt_clip_duration)
         layout.addWidget(set_button)
 
+        return layout
+
+    def make_right_layout(self):
+        layout = QVBoxLayout()
+
+        delete_button = StyledButton(
+            'Delete Clip', StyledButton.Style.NEGATIVE)
+        delete_button.setSizePolicy(
+            QSizePolicy.Fixed, QSizePolicy.Expanding)
+        delete_button.setMinimumWidth(120)
+        delete_button.clicked.connect(self.delete_clip.emit)
+        layout.addWidget(delete_button)
+
         rename_button = StyledButton('Rename Clip')
         rename_button.setSizePolicy(
-            QSizePolicy.Expanding, QSizePolicy.Expanding)
+            QSizePolicy.Fixed, QSizePolicy.Expanding)
+        rename_button.setMinimumWidth(120)
         rename_button.clicked.connect(self.rename_clip.emit)
         layout.addWidget(rename_button)
 
@@ -130,7 +140,7 @@ class ClipInfo(QFrame):
             QStyle.StandardPixmap.SP_DialogApplyButton
         ))
         set_button.setToolTip(f'Set {label_txt} frame')
-        set_button.setFixedSize(32, 32)
+        set_button.setFixedSize(64, 32)
         set_button.clicked.connect(set_signal)
         layout.addWidget(set_button)
 
@@ -139,7 +149,7 @@ class ClipInfo(QFrame):
             QStyle.StandardPixmap.SP_ArrowRight
         ))
         jump_button.setToolTip(f'Jump to {label_txt} frame')
-        jump_button.setFixedSize(32, 32)
+        jump_button.setFixedSize(64, 32)
         jump_button.clicked.connect(jump_signal)
         layout.addWidget(jump_button)
 
