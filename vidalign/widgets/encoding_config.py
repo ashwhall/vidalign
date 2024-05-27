@@ -1,6 +1,7 @@
 from typing import List
 
 from PySide6 import QtCore, QtWidgets
+from PySide6.QtWidgets import QStyle
 
 from vidalign.constants import COLOURS
 from vidalign.utils.encoders.encoder import Encoder
@@ -69,15 +70,27 @@ class EncodingConfig(QtWidgets.QFrame):
 
         btn_layout = QtWidgets.QHBoxLayout()
 
-        load_btn = StyledButton('Load')
+        load_btn = StyledButton(None)
+        load_btn.setIcon(self.style().standardIcon(
+            QStyle.StandardPixmap.SP_DialogOpenButton
+        ))
+        load_btn.setToolTip('Load encoding settings')
         load_btn.clicked.connect(self.on_load)
         btn_layout.addWidget(load_btn)
 
-        save_btn = StyledButton('Save')
+        save_btn = StyledButton(None)
+        save_btn.setIcon(self.style().standardIcon(
+            QStyle.StandardPixmap.SP_DialogSaveButton
+        ))
+        save_btn.setToolTip('Save encoding settings')
         save_btn.clicked.connect(self.on_save)
         btn_layout.addWidget(save_btn)
 
-        reset = StyledButton('Reset to default')
+        reset = StyledButton(None)
+        reset.setIcon(self.style().standardIcon(
+            QStyle.StandardPixmap.SP_BrowserReload
+        ))
+        reset.setToolTip('Reset encoding settings to default')
         reset.clicked.connect(self.on_load_default)
         btn_layout.addWidget(reset)
 

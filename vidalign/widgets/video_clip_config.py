@@ -1,6 +1,7 @@
 import os
 
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtCore, QtWidgets
+from PySide6.QtWidgets import QStyle
 
 from vidalign.constants import COLOURS
 from vidalign.widgets.modules import StyledButton
@@ -39,12 +40,13 @@ class VideoClipConfig(QtWidgets.QFrame):
         self.setLayout(self.layout)
 
     def _update_output_dir(self, output_dir):
-        label_txt = self.ellipsize_path(output_dir) if output_dir else 'Not set'
+        label_txt = self.ellipsize_path(
+            output_dir) if output_dir else 'Not set'
         tooltip_txt = output_dir or 'No output directory set'
 
         self.output_dir_label.setText(label_txt)
         self.output_dir_label.setToolTip(tooltip_txt)
-    
+
     @classmethod
     def ellipsize_path(cls, path, max_len=30):
         # Remove directories from a path and replace with ellipses, prioritising the tail of the path
@@ -54,9 +56,12 @@ class VideoClipConfig(QtWidgets.QFrame):
             parts = os.path.normpath(path).split(os.path.sep)
 
             # Iterate over the path, alternating between adding the left and right missing parts
-            i = 0; left_idx = 1; right_idx = len(parts) - 1
+            i = 0
+            left_idx = 1
+            right_idx = len(parts) - 1
 
-            prospective_str = os.path.sep.join((*parts[:left_idx], '...', *parts[right_idx:]))
+            prospective_str = os.path.sep.join(
+                (*parts[:left_idx], '...', *parts[right_idx:]))
             out_path = prospective_str
             while len(prospective_str) < max_len:
                 out_path = prospective_str
@@ -64,9 +69,10 @@ class VideoClipConfig(QtWidgets.QFrame):
                     left_idx += 1
                 else:
                     right_idx -= 1
-                prospective_str = os.path.sep.join((*parts[:left_idx], '...', *parts[right_idx:]))
+                prospective_str = os.path.sep.join(
+                    (*parts[:left_idx], '...', *parts[right_idx:]))
                 i += 1
-                    
+
         return out_path
 
     def _make_file_handling_layout(self):
@@ -74,15 +80,27 @@ class VideoClipConfig(QtWidgets.QFrame):
 
         btn_layout = QtWidgets.QHBoxLayout()
 
-        load_btn = StyledButton('Load')
+        load_btn = StyledButton(None)
+        load_btn.setIcon(self.style().standardIcon(
+            QStyle.StandardPixmap.SP_DialogOpenButton
+        ))
+        load_btn.setToolTip('Load clips')
         load_btn.clicked.connect(self.on_load)
         btn_layout.addWidget(load_btn)
 
-        save_btn = StyledButton('Save')
+        save_btn = StyledButton(None)
+        save_btn.setIcon(self.style().standardIcon(
+            QStyle.StandardPixmap.SP_DialogSaveButton
+        ))
+        save_btn.setToolTip('Save clips')
         save_btn.clicked.connect(self.on_save)
         btn_layout.addWidget(save_btn)
 
-        save_btn = StyledButton('Reset', StyledButton.Style.NEGATIVE)
+        save_btn = StyledButton(None)
+        save_btn.setIcon(self.style().standardIcon(
+            QStyle.StandardPixmap.SP_BrowserReload
+        ))
+        save_btn.setToolTip('Reset clips')
         save_btn.clicked.connect(self.on_reset)
         btn_layout.addWidget(save_btn)
 
@@ -114,8 +132,7 @@ class VideoClipConfig(QtWidgets.QFrame):
         layout.addWidget(btn)
 
         return layout
-    
+
     @QtCore.Slot()
     def on_browse_button_clicked(self):
         self.file_dialog.exec()
-        

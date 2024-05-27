@@ -5,11 +5,14 @@ from PySide6 import QtCore
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFontDatabase, QImage, QKeySequence, QPixmap
 from PySide6.QtWidgets import (QHBoxLayout, QLabel, QSizePolicy, QSpinBox,
-                               QVBoxLayout, QWidget)
+                               QStyle, QVBoxLayout, QWidget)
 
 from vidalign.utils.video import Box, Video
 from vidalign.widgets.modules import ImageViewer, StyledButton
 from vidalign.widgets.modules.tick_slider import TickSlider
+
+PLAYBACK_BTN_SIZE = (50, 40)
+CROP_JUMP_BTN_SIZE = (80, 40)
 
 
 def requires_video(fn):
@@ -96,48 +99,78 @@ class VideoPlayer(QWidget):
         layout = QHBoxLayout()
 
         # Crop keyframe jumping
-        prev_crop_kf_button = self.Button(text='Prev Crop\nq')
+        prev_crop_kf_button = self.Button(text='Prev Crop')
+        prev_crop_kf_button.setToolTip('Jump to previous crop keyframe (q)')
         prev_crop_kf_button.setShortcut(QKeySequence('q'))
+        prev_crop_kf_button.setFixedSize(*CROP_JUMP_BTN_SIZE)
         prev_crop_kf_button.clicked.connect(self.seek_to_prev_crop_frame)
         layout.addWidget(prev_crop_kf_button)
 
-        next_crop_kf_button = self.Button(text='Next Crop\ne')
+        next_crop_kf_button = self.Button(text='Next Crop')
+        next_crop_kf_button.setToolTip('Jump to next crop keyframe (e)')
         next_crop_kf_button.setShortcut(QKeySequence('e'))
+        next_crop_kf_button.setFixedSize(*CROP_JUMP_BTN_SIZE)
         next_crop_kf_button.clicked.connect(self.seek_to_next_crop_frame)
         layout.addWidget(next_crop_kf_button)
 
-        # Tool separator (blank label)
-        layout.addWidget(QLabel('|'))
+        layout.addStretch()
 
         # Frame jumping
-        big_prev_frame_button = self.Button(text='←←\nA')
-        big_prev_frame_button.setShortcut(QKeySequence('shift+a'))
-        big_prev_frame_button.clicked.connect(
+        self.big_prev_frame_button = self.Button()
+        self.big_prev_frame_button.setIcon(self.style().standardIcon(
+            QStyle.StandardPixmap.SP_MediaSkipBackward
+        ))
+        self.big_prev_frame_button.setToolTip(
+            f'Jump back by {self.jump_size} frames (Shift+A)')
+        self.big_prev_frame_button.setShortcut(QKeySequence('shift+a'))
+        self.big_prev_frame_button.setFixedSize(*PLAYBACK_BTN_SIZE)
+        self.big_prev_frame_button.clicked.connect(
             lambda: self.seek_relative(-self.jump_size))
-        layout.addWidget(big_prev_frame_button)
+        layout.addWidget(self.big_prev_frame_button)
 
-        prev_frame_button = self.Button(text='←\na')
+        prev_frame_button = self.Button()
+        prev_frame_button.setIcon(self.style().standardIcon(
+            QStyle.StandardPixmap.SP_MediaSeekBackward
+        ))
+        prev_frame_button.setToolTip('Jump back by 1 frame (a)')
         prev_frame_button.setShortcut(QKeySequence('a'))
+        prev_frame_button.setFixedSize(*PLAYBACK_BTN_SIZE)
         prev_frame_button.clicked.connect(self.prev)
         layout.addWidget(prev_frame_button)
 
-        self.play_pause_button = self.Button(text='►\n<space>')
+        self.play_pause_button = self.Button()
         self.play_pause_button.setShortcut(QKeySequence('space'))
+        self.play_pause_button.setFixedSize(*PLAYBACK_BTN_SIZE)
+        self.started_or_stopped_playing(False)
         self.play_pause_button.clicked.connect(self.play_pause)
         layout.addWidget(self.play_pause_button)
 
-        next_frame_button = self.Button(text='→\nd')
+        next_frame_button = self.Button()
+        next_frame_button.setIcon(self.style().standardIcon(
+            QStyle.StandardPixmap.SP_MediaSeekForward
+        ))
+        next_frame_button.setToolTip('Jump forward by 1 frame (d)')
         next_frame_button.setShortcut(QKeySequence('d'))
+        next_frame_button.setFixedSize(*PLAYBACK_BTN_SIZE)
         next_frame_button.clicked.connect(self.next)
         layout.addWidget(next_frame_button)
 
-        big_next_frame_button = self.Button(text='→→\nD')
-        big_next_frame_button.setShortcut(QKeySequence('shift+d'))
-        big_next_frame_button.clicked.connect(
+        self.big_next_frame_button = self.Button()
+        self.big_next_frame_button.setIcon(self.style().standardIcon(
+            QStyle.StandardPixmap.SP_MediaSkipForward
+        ))
+        self.big_next_frame_button.setToolTip(
+            f'Jump forward by {self.jump_size} frames (Shift+D)')
+        self.big_next_frame_button.setShortcut(QKeySequence('shift+d'))
+        self.big_next_frame_button.setFixedSize(*PLAYBACK_BTN_SIZE)
+        self.big_next_frame_button.clicked.connect(
             lambda: self.seek_relative(self.jump_size))
-        layout.addWidget(big_next_frame_button)
+        layout.addWidget(self.big_next_frame_button)
+
+        layout.addStretch()
 
         jump_size_label = QLabel('Jump size:')
+        jump_size_label.setToolTip('Number of frames to jump by')
         layout.addWidget(jump_size_label)
         jump_size_input = QSpinBox()
         jump_size_input.setRange(1, 1000)
@@ -177,6 +210,10 @@ class VideoPlayer(QWidget):
 
     def set_jump_size(self, size: int):
         self.jump_size = size
+        self.big_prev_frame_button.setToolTip(
+            f'Jump back by {self.jump_size} frames (Shift+A)')
+        self.big_next_frame_button.setToolTip(
+            f'Jump forward by {self.jump_size} frames (Shift+D)')
 
     def slider_callback(self, value):
         if not self.is_playing:
@@ -208,9 +245,15 @@ class VideoPlayer(QWidget):
     def started_or_stopped_playing(self, playing: bool):
         btn_shortcut = self.play_pause_button.shortcut()
         if playing:
-            self.play_pause_button.setText('❚❚\n<space>')
+            self.play_pause_button.setIcon(self.style().standardIcon(
+                QStyle.StandardPixmap.SP_MediaPause
+            ))
+            self.play_pause_button.setToolTip('Pause (space)')
         else:
-            self.play_pause_button.setText('▶️\n<space>')
+            self.play_pause_button.setIcon(self.style().standardIcon(
+                QStyle.StandardPixmap.SP_MediaPlay
+            ))
+            self.play_pause_button.setToolTip('Play (space)')
         self.play_pause_button.setShortcut(btn_shortcut)
 
     def clear(self):

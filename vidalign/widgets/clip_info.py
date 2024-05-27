@@ -1,6 +1,6 @@
 from PySide6 import QtCore
 from PySide6.QtWidgets import (QErrorMessage, QFrame, QHBoxLayout, QLabel,
-                               QSizePolicy, QVBoxLayout)
+                               QSizePolicy, QStyle, QVBoxLayout)
 
 from vidalign.constants import COLOURS
 from vidalign.widgets.modules import StyledButton
@@ -78,9 +78,9 @@ class ClipInfo(QFrame):
         self.label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         layout.addLayout(self.make_set_jump_buttons(
-            'Start:', self.set_clip_start, self.jump_clip_start))
+            'Start', self.set_clip_start, self.jump_clip_start))
         layout.addLayout(self.make_set_jump_buttons(
-            'End:', self.set_clip_end, self.jump_clip_end))
+            'End', self.set_clip_end, self.jump_clip_end))
 
         layout.addLayout(self.make_set_duration_button())
 
@@ -112,15 +112,23 @@ class ClipInfo(QFrame):
     def make_set_jump_buttons(self, label_txt, set_signal, jump_signal):
         layout = QHBoxLayout()
 
-        label = QLabel(label_txt)
+        label = QLabel(f'{label_txt}:')
         layout.addWidget(label)
 
-        set_button = StyledButton('Set', StyledButton.Style.PRIMARY)
+        set_button = StyledButton(None)
+        set_button.setIcon(self.style().standardIcon(
+            QStyle.StandardPixmap.SP_DialogApplyButton
+        ))
+        set_button.setToolTip(f'Set {label_txt} frame')
         set_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         set_button.clicked.connect(set_signal)
         layout.addWidget(set_button)
 
-        jump_button = StyledButton('Jump')
+        jump_button = StyledButton(None)
+        jump_button.setIcon(self.style().standardIcon(
+            QStyle.StandardPixmap.SP_ArrowRight
+        ))
+        jump_button.setToolTip(f'Jump to {label_txt} frame')
         jump_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         jump_button.clicked.connect(jump_signal)
         layout.addWidget(jump_button)

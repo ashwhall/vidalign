@@ -24,6 +24,8 @@ class ConfigView(QtWidgets.QWidget):
             self._model.output_directory, self._model.encoders, self._model.current_encoder)
         self.layout.addWidget(self._encoding_config)
 
+        self.layout.addStretch()
+
         self._video_clip_config = VideoClipConfig(self._model.output_directory)
         self.layout.addWidget(self._video_clip_config)
 
