@@ -7,13 +7,15 @@ python3 vidalign/encode_unattended.py dir/containing/configs
 """
 
 
-from time import sleep
 import os
-from sys import argv
 from argparse import ArgumentParser
+from sys import argv
+from time import sleep
+
 from PySide6.QtWidgets import QApplication
-from vidalign.model import Model
+
 from vidalign.controllers import MainController
+from vidalign.model import Model
 from vidalign.views.main_view import MainView
 
 app = QApplication()
@@ -51,15 +53,23 @@ def run(p, skip_existing):
         return f'Total: {int(round(percent * 100))}% | Task: {line}'
 
     last_line = 'Starting...'
+    lines_read = 0
     while model.encoding_percentage < 1:
+        if len(model.encoding_stdout_lines) > lines_read:
+            for line in model.encoding_stdout_lines[lines_read:]:
+                if '===' in line:
+                    print(line, flush=True)
+            lines_read = len(model.encoding_stdout_lines)
+
         if len(model.encoding_stdout_lines) > 0:
-            new_line = fmt_line(model.encoding_percentage,
-                                model.encoding_stdout_lines[-1])
-            if new_line != last_line:
-                print(new_line, end='\r', flush=True)
-                last_line = new_line
+            last_line = model.encoding_stdout_lines[-1]
+        line = fmt_line(model.encoding_percentage,
+                        last_line)
+        print(line, end='\r', flush=True)
+
         sleep(0.25)
-    print('Finished!')
+
+    print('\nFinished!')
 
 
 def run_dir(p, recurse, skip_existing):
