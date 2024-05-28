@@ -386,6 +386,15 @@ class Model(QtCore.QObject):
             self.encoding_stdout_lines = []
             cancelled = False
 
+            if skip_existing:
+                i = len(self.encoding_tasks) - 1
+                while i >= 0:
+                    task = self.encoding_tasks[i]
+                    # Drop any tasks where the output already exists
+                    if task.output_exists(self.output_directory):
+                        self.encoding_tasks.pop(i)
+                    i -= 1
+
             self.encoding_stdout_lines.append(
                 '=== STARTING ENCODING TASKS ===')
             for i, task in enumerate(self.encoding_tasks):
@@ -396,16 +405,6 @@ class Model(QtCore.QObject):
                     f'=== VIDEO: {task.video.name} ===')
                 self.encoding_stdout_lines.append('')
                 self.encoding_stdout_lines = self.encoding_stdout_lines
-
-                if skip_existing:
-                    # if Path(task.get_output_path(self.output_directory)).exists():
-                    if task.output_exists(self.output_directory):
-                        self.encoding_stdout_lines.append(
-                            'Skipping as it already exists')
-                        self.encoding_stdout_lines = self.encoding_stdout_lines
-                        self.encoding_percentage = (
-                            i + 1) / len(self.encoding_tasks)
-                        continue
 
                 # Hold onto the stdout lines prior to starting this task, so we can repeatedly
                 # append the "updated" lines to the end of the list. Just a funny trick to handle

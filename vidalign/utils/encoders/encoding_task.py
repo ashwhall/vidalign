@@ -1,12 +1,12 @@
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List
-from dataclasses import dataclass
 
-from vidalign.utils.video import Video
-from vidalign.utils.video_reader import VideoReader
 from vidalign.utils.clip import Clip
 from vidalign.utils.encoders import Encoder
+from vidalign.utils.video import Video
+from vidalign.utils.video_reader import VideoReader
 
 
 @dataclass
@@ -21,9 +21,14 @@ class EncodingTask:
     def output_exists(self, output_dir):
         output_path = self.get_output_path(output_dir)
         if Path(output_path).exists():
-            video = VideoReader(output_path)
-            if len(video) == len(self.clip):
-                return True
+            try:
+                video = VideoReader(output_path)
+                # Don't ask..
+                expected_length = len(self.clip) - 1
+                if len(video) == expected_length:
+                    return True
+            except Exception:
+                return False
         return False
 
     def get_output_path(self, output_dir):
