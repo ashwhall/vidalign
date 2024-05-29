@@ -4,11 +4,13 @@ A tool to perform multi-camera video temporal alignment and clip extraction.
 
 ## Installation
 
-Install Anaconda [here](https://www.anaconda.com/download/success) or Miniconda [here](https://docs.anaconda.com/free/miniconda/miniconda-install/), then run the following commands:
+Install Anaconda [here](https://www.anaconda.com/download/success) or Miniconda [here](https://docs.anaconda.com/free/miniconda/miniconda-install/), then run the below command:
 
 ```bash
 conda env create -f environment.yml;
 ```
+
+> There are likely some system dependencies that need to be installed prior to this setup procedure. Raise an issue if you encounter any such problems, or create a pull request if you know how to fix them.
 
 ## Usage
 
@@ -21,14 +23,14 @@ python -m vidalign;
 
 ![screenshot](vidalign/assets/ui_screenshot.png)
 
-1. **Video Player**: Basic video playback and frame seeking, with support for panning and zooming using the mouse. Take note of the keyboard shortcuts on the playback buttons, as they'll be your best friend.
-2. **Video Dropper**: Drop video files and folders here to import them. Directories will be descended recursively looking for video files. At the time of writing the supported extensions are: `{mp4, avi, mkv, mov, mxf}`.
-3. **Video Info**: Information about the currently selected video, with buttons to set metadata. See [workflow](#workflow) below for more detail.
+1. **Video Player**: Basic video playback and frame seeking, with support for panning and zooming using the mouse. Take note of the keyboard shortcuts by hovering on the playback buttons, as they'll be your best friend. There are also some cropping tools available, see [cropping](#cropping) below.
+2. **Video Dropper**: Drop video files and folders here to import them. Directories will be descended recursively looking for video files. At the time of writing the supported extensions are: `{mp4, avi, mkv, mov, mxf}`. You can optionally filter the video filenames using the text box, with an asterisk (`*`) acting as a wildcard (e.g. `left*` will match any filename starting with "left").
+3. **Video Info**: Information about the currently selected video, with buttons to set sync frames and aliases. See [workflow](#workflow) below for more detail.
 4. **Video List**: List of imported videos. If there are no empty cells here, you've done what's needed for the videos. _Ensure you don't set the same alias for multiple videos!_
 5. **Clip Info**: Information about the currently selected clip, with buttons to set the start and end frames, and other useful things. See [workflow](#workflow) below for more detail.
-6. **Clip List**: List of clips videos. If there are no empty cells here, you've done what's needed for the clips. _Ensure you don't set the same clip name for multiple clips!_
-7. **Video/Clip File Utilities**: Set the output directory for your exported clips, and save/load/reset the videos and clips. Handy if you need to save your progress and return to it later.
-8. **Encoder Settings**: Here you can choose your encoder application (just FFmpeg at this point), configure some of the encoding parameters, and save/load/reset them. If you figure out parameters that you like, export them and load them at the start of each session.
+6. **Clip List**: List of clips. If there are no empty cells here, you've done what's needed for the clips. _Ensure you don't set the same clip name for multiple clips!_
+7. **Video/Clip File Utilities**: Set the output directory for your exported clips, and save/load/reset the videos and clips. Handy if you need to save your progress and return to it later, or just for reproducibility.
+8. **Encoder Settings**: Here you can choose your encoder implementation (either FFmpeg or PyAV), configure some of the encoding parameters, and save/load/reset them. If you figure out parameters that you like, export them and load them at the start of each session.
 
 ### Workflow
 
@@ -45,6 +47,7 @@ python -m vidalign;
 1. Open up the encoder options and check that you're happy with them.
    - Instead you can load a previous encoder configuration from file if you have one prepared.
    - I like using PyAV for encoding, but FFmpeg is also a good choice as it's more tried and tested.
+   - Note that the PyAV implementation currently has a memory leak, so you may need to restart the app after encoding many clips.
 1. View the encoder commands to check that everything is as expected.
    - You can copy-paste them elsewhere if you want to make any changes that the app can't facilitate.
    - This is only available for FFmpeg at the moment.
