@@ -46,7 +46,7 @@ class Model(QtCore.QObject):
         self._video_playback_timer = QtCore.QTimer()
         self._video_playback_timer.timeout.connect(self._play_callback)
 
-        self._encoders = [FFmpeg(), PyAV()]
+        self._encoders = [PyAV(), FFmpeg()]
         self._current_encoder = self._encoders[0]
         self._encoding_tasks: List[EncodingTask] = []
         self._encoding_percentage: float = None
@@ -387,39 +387,53 @@ class Model(QtCore.QObject):
             cancelled = False
 
             if skip_existing:
+                skip_count = 0
+                total_count = len(self.encoding_tasks)
+                self.encoding_stdout_lines.append(
+                    f'=== SKIPPING EXISTING ENCODING TASKS ({skip_count} / {total_count}')
+                self.encoding_stdout_lines = self.encoding_stdout_lines
                 i = len(self.encoding_tasks) - 1
                 while i >= 0:
                     task = self.encoding_tasks[i]
                     # Drop any tasks where the output already exists
                     if task.output_exists(self.output_directory):
                         self.encoding_tasks.pop(i)
+                        skip_count += 1
+                        self.encoding_stdout_lines[-1] = f'=== SKIPPING EXISTING ENCODING TASKS ({skip_count} / {total_count}) ==='
+                        self.encoding_stdout_lines = self.encoding_stdout_lines
                     i -= 1
 
-            self.encoding_stdout_lines.append(
-                '=== STARTING ENCODING TASKS ===')
-            for i, task in enumerate(self.encoding_tasks):
-                self.encoding_stdout_lines.append('')
+            if len(self.encoding_tasks) == 0:
                 self.encoding_stdout_lines.append(
-                    f'=== STARTING ENCODING TASK {i + 1}/{len(self.encoding_tasks)} ===')
-                self.encoding_stdout_lines.append(
-                    f'=== VIDEO: {task.video.name} ===')
-                self.encoding_stdout_lines.append('')
+                    '=== NO ENCODING TASKS TO PERFORM ===')
                 self.encoding_stdout_lines = self.encoding_stdout_lines
+            else:
+                self.encoding_stdout_lines.append(
+                    '=== STARTING ENCODING TASKS ===')
+                for i, task in enumerate(self.encoding_tasks):
+                    self.encoding_stdout_lines.append('')
+                    self.encoding_stdout_lines.append(
+                        f'=== STARTING ENCODING TASK {i + 1}/{len(self.encoding_tasks)} ===')
+                    self.encoding_stdout_lines.append(
+                        f'=== VIDEO: {task.video.name} ===')
+                    self.encoding_stdout_lines.append('')
+                    self.encoding_stdout_lines = self.encoding_stdout_lines
 
-                # Hold onto the stdout lines prior to starting this task, so we can repeatedly
-                # append the "updated" lines to the end of the list. Just a funny trick to handle
-                # \r characters in the output
-                pre_task_std_lines = self.encoding_stdout_lines
-                for updated_std_lines in task.run_encode_job(self.output_directory):
-                    self.encoding_stdout_lines = [
-                        *pre_task_std_lines, *updated_std_lines]
+                    # Hold onto the stdout lines prior to starting this task, so we can repeatedly
+                    # append the "updated" lines to the end of the list. Just a funny trick to handle
+                    # \r characters in the output
+                    pre_task_std_lines = self.encoding_stdout_lines
+                    for updated_std_lines in task.run_encode_job(self.output_directory):
+                        self.encoding_stdout_lines = [
+                            *pre_task_std_lines, *updated_std_lines]
 
-                cancelled = cancelled or any(
-                    [task.cancelled for task in self.encoding_tasks])
-                if cancelled:
-                    break
+                    cancelled = cancelled or any(
+                        [task.cancelled for task in self.encoding_tasks])
+                    if cancelled:
+                        break
 
-                self.encoding_percentage = (i + 1) / len(self.encoding_tasks)
+                    self.encoding_percentage = (
+                        i + 1) / len(self.encoding_tasks)
 
             if cancelled:
                 self.encoding_percentage = None

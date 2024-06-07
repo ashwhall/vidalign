@@ -1,5 +1,7 @@
 import json
+
 from PySide6 import QtCore, QtWidgets
+
 from vidalign.model import Model
 from vidalign.utils.encoders.encoder import Encoder
 
@@ -86,7 +88,7 @@ class ConfigController(QtCore.QObject):
         dialog.exec()
 
     @QtCore.Slot()
-    def on_run_encode_commands(self):
+    def on_run_encode_commands(self, skip_existing: bool):
         is_ready, not_ready_msg = self._model.ready_to_encode()
         if not is_ready:
             QtWidgets.QMessageBox.warning(
@@ -96,7 +98,7 @@ class ConfigController(QtCore.QObject):
             )
             return
 
-        self._model.start_encoding_tasks()
+        self._model.start_encoding_tasks(skip_existing)
 
     @QtCore.Slot()
     def on_cancel_encode(self):

@@ -15,7 +15,7 @@ class EncodingConfig(QtWidgets.QFrame):
     on_load_default = QtCore.Signal()
 
     on_view_encode_commands = QtCore.Signal()
-    on_run_encode_commands = QtCore.Signal()
+    on_run_encode_commands = QtCore.Signal(bool)
     on_cancel_encode = QtCore.Signal()
     on_finalise_encoding = QtCore.Signal()
     on_encoder_changed = QtCore.Signal(Encoder)
@@ -25,6 +25,7 @@ class EncodingConfig(QtWidgets.QFrame):
         self._output_dir = output_dir
         self._encoders = encoders
         self._current_encoder = current_encoder
+        self._skip_existing = False
 
         self.layout = QtWidgets.QVBoxLayout()
 
@@ -46,6 +47,9 @@ class EncodingConfig(QtWidgets.QFrame):
         self.encoding_dialog = None
 
         self.setLayout(self.layout)
+
+    def _set_skip_existing(self, overwrite: bool):
+        self._skip_existing = overwrite
 
     def _make_encoder_layout(self):
         layout = QtWidgets.QVBoxLayout()
@@ -106,13 +110,21 @@ class EncodingConfig(QtWidgets.QFrame):
         label.setFixedHeight(30)
         layout.addWidget(label)
 
-        load_btn = StyledButton('View encode commands')
-        load_btn.clicked.connect(self.on_view_encode_commands)
-        layout.addWidget(load_btn)
+        view_commands_btn = StyledButton('View encode commands')
+        view_commands_btn.clicked.connect(self.on_view_encode_commands)
+        layout.addWidget(view_commands_btn)
 
-        save_btn = StyledButton('Run encode commands')
-        save_btn.clicked.connect(self.on_run_encode_commands)
-        layout.addWidget(save_btn)
+        skip_existing_check = QtWidgets.QCheckBox('Skip existing')
+        skip_existing_check.setChecked(self._skip_existing)
+        skip_existing_check.stateChanged.connect(
+            self._set_skip_existing
+        )
+        layout.addWidget(skip_existing_check)
+
+        run_commands_btn = StyledButton('Run encode commands')
+        run_commands_btn.clicked.connect(
+            lambda: self.on_run_encode_commands.emit(self._skip_existing))
+        layout.addWidget(run_commands_btn)
 
         return layout
 
